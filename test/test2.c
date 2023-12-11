@@ -9,8 +9,9 @@ inline int main()
 
 void main()
 {
-
+    main();
 #ifdef A
+    int x = main();
     if ()
     {
     }
@@ -18,6 +19,13 @@ void main()
     {
         main();
     }
+#endif
+    main();
+
+
+#if defined A
+    main();
+    main();
 #endif
     main();
 

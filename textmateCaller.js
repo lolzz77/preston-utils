@@ -479,16 +479,40 @@ registry.loadGrammar(param[0]).then(grammar => {
                 keyword_scopes_2 = [
                     'keyword.control.switch.c'
                 ]
+                // #ifdef, #endif 
+                keyword_scopes_3 = [
+                    'keyword.control.directive.conditional.c',
+                    'meta.preprocessor.c',
+                    'meta.block.c'
+                ]
 
 
                 if(
                     (keyword_scopes_1.every(scope => token.scopes.includes(scope))) ||
-                    (keyword_scopes_2.every(scope => token.scopes.includes(scope)))
+                    (keyword_scopes_2.every(scope => token.scopes.includes(scope))) 
                 )
                 {
                     has_pause_line = true;
                     pause_start_index = token.startIndex - 1;
                     pause_line = i+1;
+                }
+                // for #ifdef, #endif, the pause_start_index is a bit different
+                // has to be after the keyword
+                // but for #ifdef, and #if defined
+                // is another different thing, u cannot put after keyword
+                // It will mess up with the MACRO keyword that comes after the #ifdef
+                else if(
+                    (keyword_scopes_3.every(scope => token.scopes.includes(scope))) &&
+                    (
+                        (line.substring(token.startIndex, token.endIndex)!='ifdef') ||
+                        (line.substring(token.startIndex, token.endIndex)!='if')
+                    )
+                )
+                {
+                    has_pause_line = true;
+                    pause_start_index = token.endIndex - 1;
+                    pause_line = i+1;
+
                 }
 
                 
