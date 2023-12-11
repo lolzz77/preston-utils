@@ -1,0 +1,65 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Textmate C",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/textmate.js",
+            "args": [
+                "./test/test2.c"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Textmate C Caller",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/textmateCaller.js",
+            "args": [
+                "./test/test2.c",
+                "main"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Textmate CPP",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/textmate.js",
+            "args": [
+                "./test/test1.cpp"
+            ]
+        },
+        {
+            "type": "python",
+            "request": "launch",
+            "name": "Python - Function Definition",
+            "program": "${workspaceFolder}/allFiles.py",
+            "args": [
+                "./test/"
+            ]
+        },
+        {
+            "type": "python",
+            "request": "launch",
+            "name": "Python - Caller",
+            "program": "${workspaceFolder}/allFiles.py",
+            "args": [
+                "./test/",
+                "caller",
+                "main"
+            ]
+        }
+    ]
+}
