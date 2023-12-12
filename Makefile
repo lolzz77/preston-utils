@@ -44,6 +44,9 @@ WAR =
 
 all: allFunc callerFunc semaphore
 
+experiment:
+	gcc -o experiment.out experiment.c -DNUM=2
+
 # append log on all files in repo
 allFunc:
 	gcc -g $(WAR) $(INC) -o allFuncExe allFunc.c $(FLAG)
