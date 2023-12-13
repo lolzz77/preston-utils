@@ -175,7 +175,6 @@ registry.loadGrammar(param[0]).then(grammar => {
         let pause_here = false; // to put caller, for cases like if(), then the parenthesis is multi-line
         let has_pause_line = false;
         let to_put_into_previous_line = false;
-        let to_put_into_next_line = false;
         let has_special_index_to_put_log = false;
 
         /**
@@ -479,11 +478,18 @@ registry.loadGrammar(param[0]).then(grammar => {
                 keyword_scopes_2 = [
                     'keyword.control.switch.c'
                 ]
-                // #ifdef, #endif 
+                /** 
+                 * #ifdef, #endif 
+                 * 
+                 * withint this line, all token will have the 'meta.preprocessor.c'
+                 * that is, whitespace, brackets, will have 'meta.preprocessor.c'
+                 * 
+                 * we can use this to track whether it is end of preprocessor
+                 * and thus able to append log after this preprocessor symbols
+                 */
+                
                 keyword_scopes_3 = [
-                    'keyword.control.directive.conditional.c',
                     'meta.preprocessor.c',
-                    'meta.block.c'
                 ]
 
 
@@ -505,19 +511,19 @@ registry.loadGrammar(param[0]).then(grammar => {
                  * eg: #ifdef DEBUG -> #ifdef printf("MEE") DEBUG
                  * 
                  * Thus, for #ifdef those, it's better to put log into next line
+                 * 
+                 * putting into next line will cause the next printf disturbed
+                 * so, it's better to put at the end of #ifdef
                  */
                 else if(
                     (keyword_scopes_3.every(scope => token.scopes.includes(scope)))
                 )
                 {
-                    to_put_into_next_line = true;
-                    next_line = i+2;
-
-                    to_put_into_previous_line = false;
-                    has_pause_line = false;
+                    pause_line = i+1;
+                    pause_start_index = token.endIndex - 1;
+                    has_pause_line = true;
                 }
 
-                
                 let caller_keyword = param[2];
 
 
@@ -551,8 +557,6 @@ registry.loadGrammar(param[0]).then(grammar => {
                     {
                         if(has_pause_line)
                             print_onto_console(pause_line, pause_start_index, -1, '', '', true);
-                        else if(to_put_into_next_line)
-                            print_onto_console(next_line, 0, -1, '', '', true);
                         else if(to_put_into_previous_line)
                             print_onto_console(previous_line, previous_index_to_put_log, -1, '', '', true);
                         else
@@ -561,7 +565,6 @@ registry.loadGrammar(param[0]).then(grammar => {
                         
                         has_pause_line = false;
                         to_put_into_previous_line = false;
-                        to_put_into_next_line = false;
                         has_special_index_to_put_log = false;
 
                     }
