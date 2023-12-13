@@ -175,6 +175,7 @@ registry.loadGrammar(param[0]).then(grammar => {
         let pause_here = false; // to put caller, for cases like if(), then the parenthesis is multi-line
         let has_pause_line = false;
         let to_put_into_previous_line = false;
+        let to_put_into_next_line = false;
         let has_special_index_to_put_log = false;
 
         /**
@@ -447,8 +448,7 @@ registry.loadGrammar(param[0]).then(grammar => {
                     }
 
 
-
-                    // is function definition
+                    // is switch case, `case VALUE:`
                     if(
                         (line.substring(token.startIndex, token.endIndex)==':')&&
                         (has_special_index_to_put_log==true)
@@ -496,23 +496,25 @@ registry.loadGrammar(param[0]).then(grammar => {
                     pause_start_index = token.startIndex - 1;
                     pause_line = i+1;
                 }
-                // for #ifdef, #endif, the pause_start_index is a bit different
-                // has to be after the keyword
-                // but for #ifdef, and #if defined
-                // is another different thing, u cannot put after keyword
-                // It will mess up with the MACRO keyword that comes after the #ifdef
+                /***
+                 * for #ifdef, #endif, the pause_start_index is a bit different
+                 * has to be after the keyword
+                 * but for #ifdef, and #if defined
+                 * is another different thing, u cannot put after keyword
+                 * It will mess up with the MACRO keyword that comes after the #ifdef
+                 * eg: #ifdef DEBUG -> #ifdef printf("MEE") DEBUG
+                 * 
+                 * Thus, for #ifdef those, it's better to put log into next line
+                 */
                 else if(
-                    (keyword_scopes_3.every(scope => token.scopes.includes(scope))) &&
-                    (
-                        (line.substring(token.startIndex, token.endIndex)!='ifdef') ||
-                        (line.substring(token.startIndex, token.endIndex)!='if')
-                    )
+                    (keyword_scopes_3.every(scope => token.scopes.includes(scope)))
                 )
                 {
-                    has_pause_line = true;
-                    pause_start_index = token.endIndex - 1;
-                    pause_line = i+1;
+                    to_put_into_next_line = true;
+                    next_line = i+2;
 
+                    to_put_into_previous_line = false;
+                    has_pause_line = false;
                 }
 
                 
@@ -549,6 +551,8 @@ registry.loadGrammar(param[0]).then(grammar => {
                     {
                         if(has_pause_line)
                             print_onto_console(pause_line, pause_start_index, -1, '', '', true);
+                        else if(to_put_into_next_line)
+                            print_onto_console(next_line, 0, -1, '', '', true);
                         else if(to_put_into_previous_line)
                             print_onto_console(previous_line, previous_index_to_put_log, -1, '', '', true);
                         else
@@ -557,6 +561,7 @@ registry.loadGrammar(param[0]).then(grammar => {
                         
                         has_pause_line = false;
                         to_put_into_previous_line = false;
+                        to_put_into_next_line = false;
                         has_special_index_to_put_log = false;
 
                     }
