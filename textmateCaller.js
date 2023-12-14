@@ -525,6 +525,7 @@ registry.loadGrammar(param[0]).then(grammar => {
                         ]
                         keyword_scopes_3 = [
                             'meta.preprocessor.conditional',
+                            'keyword.control.directive.conditional.if.cpp',
                             'keyword.control.directive.conditional.ifdef.cpp',
                             'keyword.control.directive.else.cpp',
                             'keyword.control.directive.endif.cpp',
@@ -555,12 +556,35 @@ registry.loadGrammar(param[0]).then(grammar => {
                      * so, it's better to put at the end of #ifdef
                      */
                     else if(
-                        (keyword_scopes_3.every(scope => token.scopes.includes(scope)))
+                        /************
+                         * !!HEED!!
+                         * IT'S "SOME"
+                         * !!HEED!!
+                         * 
+                         * Because for CPP, i have defiend a lot, and combine them into one array
+                         */
+                        (keyword_scopes_3.some(scope => token.scopes.includes(scope)))
                     )
                     {
-                        pause_line = i+1;
-                        pause_start_index = token.endIndex - 1;
-                        has_pause_line = true;
+                        /***
+                         * For C, the textmatescope regex are well defined
+                         * However, for CPP, the textamte scope regex are not
+                         * Thus, for CPP, use the append to end of index of current line approach
+                         * Canno append to next line, it will affect the following indexing & cause the log to be messy
+                         */
+                        if(param[0] == 'source.c')
+                        {
+                            pause_line = i+1;
+                            pause_start_index = token.endIndex - 1;
+                            has_pause_line = true;
+                        }
+                        else if(param[0] == 'source.cpp')
+                        {
+                            pause_line = i+1;
+                            pause_start_index = lines[i].length - 1;
+                            has_pause_line = true;
+                        }
+
                     }
     
                     let caller_keyword = param[2];
