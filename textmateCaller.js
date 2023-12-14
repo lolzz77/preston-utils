@@ -167,12 +167,9 @@ registry.loadGrammar(param[0]).then(grammar => {
         let curly_bracket_count = -1;
         let round_bracket_count = -1;
         let pending_is_prototype_or_function = false;
-        let caller_operation = false; // function caller, we need to handle it differently
         let is_inline = false; // functino that has 'inline' keyword, cannot put log
         let setup_parameters = false;
         let is_function_definition = false; // to tell is the line currently in function body
-        let find_caller_next = false; // once within legit functions, can start finding function callers
-        let pause_here = false; // to put caller, for cases like if(), then the parenthesis is multi-line
         let has_pause_line = false;
         let to_put_into_previous_line = false;
         let has_special_index_to_put_log = false;
@@ -405,7 +402,6 @@ registry.loadGrammar(param[0]).then(grammar => {
                     {
                         pending_is_prototype_or_function = false;
                         is_function_definition = false;
-                        find_caller_next = false;
                         round_bracket_count = -1;
                         curly_bracket_count = -1;
                         
@@ -426,18 +422,22 @@ registry.loadGrammar(param[0]).then(grammar => {
                     )
                     {
                         is_function_definition = true;
-                        find_caller_next = true;
                     }
                     
-                    // switch case,default keyword, detect the ':' if got this
-                    keyword_scopes_3 = [
-                        'keyword.control.case.c',
-                        'meta.conditional.case.c',
-                        'meta.body.switch.c',
-                        'meta.block.switch.c',
-                        'meta.block.c'
-                    ]
-
+                    // switch, case VALUE ,default keyword,
+                    // to detect the ':'
+                    if (param[0] == 'source.c')
+                    {
+                        keyword_scopes_3 = [
+                            'meta.block.switch.c'
+                        ]
+                    }
+                    else if (param[0] == 'source.cpp')
+                    {
+                        keyword_scopes_3 = [
+                            'meta.block.switch.cpp'
+                        ]
+                    }
 
                     if(
                         (keyword_scopes_3.every(scope => token.scopes.includes(scope)))
@@ -463,34 +463,49 @@ registry.loadGrammar(param[0]).then(grammar => {
 
                 }
                 
-
-                /***
-                 * if, else if, else, switch case, 
-                 * they have parenthesises
-                 * we have to make the 'previous' line to stop at before if, else if, else, switch case
-                 */
-                // if, else if, else
-                keyword_scopes_1 = [
-                    'meta.block.c',
-                    'keyword.control.c'
-                ]
-                // switch keyword
-                keyword_scopes_2 = [
-                    'keyword.control.switch.c'
-                ]
-                /** 
-                 * #ifdef, #endif 
-                 * 
-                 * withint this line, all token will have the 'meta.preprocessor.c'
-                 * that is, whitespace, brackets, will have 'meta.preprocessor.c'
-                 * 
-                 * we can use this to track whether it is end of preprocessor
-                 * and thus able to append log after this preprocessor symbols
-                 */
-                
-                keyword_scopes_3 = [
-                    'meta.preprocessor.c',
-                ]
+                if (param[0] == 'source.c')
+                {
+                    /***
+                     * if, else if, else
+                     * they have parenthesises
+                     * we have to make the 'previous' line to stop at before if, else if, else, switch case
+                     */
+                    // if, else if, else
+                    keyword_scopes_1 = [
+                        'meta.block.c',
+                        'keyword.control.c',
+                    ]
+                    // switch keyword
+                    keyword_scopes_2 = [
+                        'keyword.control.switch.c'
+                    ]
+                    /** 
+                     * #ifdef, #endif 
+                     * 
+                     * withint this line, all token will have the 'meta.preprocessor.c'
+                     * that is, whitespace, brackets, will have 'meta.preprocessor.c'
+                     * 
+                     * we can use this to track whether it is end of preprocessor
+                     * and thus able to append log after this preprocessor symbols
+                     */
+                    
+                    keyword_scopes_3 = [
+                        'meta.preprocessor.c',
+                    ]
+                }
+                else if (param[0] == 'source.cpp')
+                {
+                    keyword_scopes_1 = [
+                        'meta.block.c',
+                        'keyword.control.c'
+                    ]
+                    keyword_scopes_2 = [
+                        'keyword.control.switch.c'
+                    ]
+                    keyword_scopes_3 = [
+                        'meta.preprocessor.c',
+                    ]
+                }
 
 
                 if(

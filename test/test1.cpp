@@ -7,6 +7,17 @@ int main()
 {
     int ret = main(a, b, c);
 
+#ifdef A
+    int x = main();
+    if ()
+    {
+    }
+    else if
+    {
+        main();
+    }
+#endif
+
     if()
         int ret = main(a, b, c);
 
@@ -21,6 +32,8 @@ int main()
 
     switch(Class::Func())
     {
+        int ret = main(a, b, c);
+        int ret = Class::main(a, b, c);
         case 1:
             int ret = main(a, b, c);
             break;

@@ -117,7 +117,7 @@ void main()
         (float*)main(d, e, f);
 
     }
-    switch (expression)
+    switch (main(a, b, c))
     {
         int ret = main(a, b, c);
 
