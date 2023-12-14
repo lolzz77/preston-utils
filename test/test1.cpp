@@ -47,6 +47,11 @@ int main()
         int ret = main(a, b, c);
     }
 
+    switch(class::main())
+    {
+        
+    }
+
     switch(Class::Func())
     {
         int ret = main(a, b, c);

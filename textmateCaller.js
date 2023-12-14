@@ -343,6 +343,19 @@ registry.loadGrammar(param[0]).then(grammar => {
                         break;
                     }
 
+                    // this is not function definition, but variable, end it
+                    if(
+                        (line.substring(token.startIndex, token.endIndex)=='=') &&
+                        (is_function_definition==false)
+                    )
+                    {
+                        pending_is_prototype_or_function = false;
+                        is_inline = false;
+                        round_bracket_count = -1;
+                        curly_bracket_count = -1;
+                        break;
+                    }
+
                     // this is not function definition, but a colon within the function
                     if(
                         (line.substring(token.startIndex, token.endIndex)==';') &&
@@ -353,6 +366,7 @@ registry.loadGrammar(param[0]).then(grammar => {
                         previous_index_to_put_log = token.startIndex;
                         to_put_into_previous_line = true;
                     }
+
 
                     // function definition parenthesis
                     if(
@@ -373,7 +387,7 @@ registry.loadGrammar(param[0]).then(grammar => {
                     // this might be curly bracket in the paranthesis
                     // or also the function opening bracket
                     if(
-                        line.substring(token.startIndex, token.endIndex)=='{'
+                        (line.substring(token.startIndex, token.endIndex)=='{')
                     )
                     {
                         if(curly_bracket_count==-1)
@@ -467,135 +481,140 @@ registry.loadGrammar(param[0]).then(grammar => {
 
                 }
                 
-                if (param[0] == 'source.c')
+                if(is_function_definition)
                 {
-                    /***
-                     * if, else if, else
-                     * they have parenthesises
-                     * we have to make the 'previous' line to stop at before if, else if, else, switch case
-                     */
-                    // if, else if, else
-                    keyword_scopes_1 = [
-                        'meta.block.c',
-                        'keyword.control.c',
-                    ]
-                    // switch keyword
-                    keyword_scopes_2 = [
-                        'keyword.control.switch.c'
-                    ]
-                    /** 
-                     * #ifdef, #endif 
-                     * 
-                     * withint this line, all token will have the 'meta.preprocessor.c'
-                     * that is, whitespace, brackets, will have 'meta.preprocessor.c'
-                     * 
-                     * we can use this to track whether it is end of preprocessor
-                     * and thus able to append log after this preprocessor symbols
-                     */
-                    
-                    keyword_scopes_3 = [
-                        'meta.preprocessor.c',
-                    ]
-                }
-                else if (param[0] == 'source.cpp')
-                {
-                    keyword_scopes_1 = [
-                        'keyword.control.if.cpp',
-                        'keyword.control.else.cpp'
-                    ]
-                    keyword_scopes_2 = [
-                        'keyword.control.switch.cpp'
-                    ]
-                    keyword_scopes_3 = [
-                        'meta.preprocessor.conditional',
-                        'keyword.control.directive.conditional.ifdef.cpp',
-                        'keyword.control.directive.else.cpp',
-                        'keyword.control.directive.endif.cpp',
-                    ]
-                }
 
-
-                if(
-                    (keyword_scopes_1.every(scope => token.scopes.includes(scope))) ||
-                    (keyword_scopes_2.every(scope => token.scopes.includes(scope))) 
-                )
-                {
-                    has_pause_line = true;
-                    pause_start_index = token.startIndex - 1;
-                    pause_line = i+1;
-                }
-                /***
-                 * for #ifdef, #endif, the pause_start_index is a bit different
-                 * has to be after the keyword
-                 * but for #ifdef, and #if defined
-                 * is another different thing, u cannot put after keyword
-                 * It will mess up with the MACRO keyword that comes after the #ifdef
-                 * eg: #ifdef DEBUG -> #ifdef printf("MEE") DEBUG
-                 * 
-                 * Thus, for #ifdef those, it's better to put log into next line
-                 * 
-                 * putting into next line will cause the next printf disturbed
-                 * so, it's better to put at the end of #ifdef
-                 */
-                else if(
-                    (keyword_scopes_3.every(scope => token.scopes.includes(scope)))
-                )
-                {
-                    pause_line = i+1;
-                    pause_start_index = token.endIndex - 1;
-                    has_pause_line = true;
-                }
-
-                let caller_keyword = param[2];
-
-                if (param[0] == 'source.c')
-                {
-                    /***
-                     * Function caller scopes
-                     */
-                    function_caller_1 = [
-                        'meta.block.c',
-                        'meta.function-call.c',
-                        'entity.name.function.c'
-                    ]
-                    // for function called under switch/case without if/else encapsulated
-                    function_caller_2 = [
-                        'entity.name.function.c',
-                        'meta.block.switch.c',
-                    ]
-                }
-                else if (param[0] == 'source.cpp')
-                {
-                    function_caller_1 = [
-                        'entity.name.function.call.cpp',
-                    ]
-                    function_caller_2 = [
-                        'source.cpp',
-                    ]
-                }
-
-
-                if(
-                    (   (function_caller_1.every(scope => token.scopes.includes(scope)))||
-                        (function_caller_2.every(scope => token.scopes.includes(scope)))
-                    ) &&
-                    (is_inline==false)
-                )
-                {
-                    if(line.substring(token.startIndex, token.endIndex)==caller_keyword)
+                    if (param[0] == 'source.c')
                     {
-                        if(has_pause_line)
-                            print_onto_console(pause_line, pause_start_index, -1, '', '', true);
-                        else if(to_put_into_previous_line)
-                            print_onto_console(previous_line, previous_index_to_put_log, -1, '', '', true);
-                        else
-                            // just print at current line, beginning index
-                            print_onto_console(i+1, 0, -1, '', '', true);
+                        /***
+                         * if, else if, else
+                         * they have parenthesises
+                         * we have to make the 'previous' line to stop at before if, else if, else, switch case
+                         */
+                        // if, else if, else
+                        keyword_scopes_1 = [
+                            'meta.block.c',
+                            'keyword.control.c',
+                        ]
+                        // switch keyword
+                        keyword_scopes_2 = [
+                            'keyword.control.switch.c'
+                        ]
+                        /** 
+                         * #ifdef, #endif 
+                         * 
+                         * withint this line, all token will have the 'meta.preprocessor.c'
+                         * that is, whitespace, brackets, will have 'meta.preprocessor.c'
+                         * 
+                         * we can use this to track whether it is end of preprocessor
+                         * and thus able to append log after this preprocessor symbols
+                         */
                         
-                        has_pause_line = false;
-                        to_put_into_previous_line = false;
-                        has_special_index_to_put_log = false;
-
+                        keyword_scopes_3 = [
+                            'meta.preprocessor.c',
+                        ]
+                    }
+                    else if (param[0] == 'source.cpp')
+                    {
+                        keyword_scopes_1 = [
+                            'keyword.control.if.cpp',
+                            'keyword.control.else.cpp'
+                        ]
+                        keyword_scopes_2 = [
+                            'keyword.control.switch.cpp'
+                        ]
+                        keyword_scopes_3 = [
+                            'meta.preprocessor.conditional',
+                            'keyword.control.directive.conditional.ifdef.cpp',
+                            'keyword.control.directive.else.cpp',
+                            'keyword.control.directive.endif.cpp',
+                        ]
+                    }
+    
+    
+                    if(
+                        (keyword_scopes_1.every(scope => token.scopes.includes(scope))) ||
+                        (keyword_scopes_2.every(scope => token.scopes.includes(scope))) 
+                    )
+                    {
+                        has_pause_line = true;
+                        pause_start_index = token.startIndex - 1;
+                        pause_line = i+1;
+                    }
+                    /***
+                     * for #ifdef, #endif, the pause_start_index is a bit different
+                     * has to be after the keyword
+                     * but for #ifdef, and #if defined
+                     * is another different thing, u cannot put after keyword
+                     * It will mess up with the MACRO keyword that comes after the #ifdef
+                     * eg: #ifdef DEBUG -> #ifdef printf("MEE") DEBUG
+                     * 
+                     * Thus, for #ifdef those, it's better to put log into next line
+                     * 
+                     * putting into next line will cause the next printf disturbed
+                     * so, it's better to put at the end of #ifdef
+                     */
+                    else if(
+                        (keyword_scopes_3.every(scope => token.scopes.includes(scope)))
+                    )
+                    {
+                        pause_line = i+1;
+                        pause_start_index = token.endIndex - 1;
+                        has_pause_line = true;
+                    }
+    
+                    let caller_keyword = param[2];
+    
+                    if (param[0] == 'source.c')
+                    {
+                        /***
+                         * Function caller scopes
+                         */
+                        function_caller_1 = [
+                            'meta.block.c',
+                            'meta.function-call.c',
+                            'entity.name.function.c'
+                        ]
+                        // for function called under switch/case without if/else encapsulated
+                        function_caller_2 = [
+                            'entity.name.function.c',
+                            'meta.block.switch.c',
+                        ]
+                    }
+                    else if (param[0] == 'source.cpp')
+                    {
+                        function_caller_1 = [
+                            'entity.name.function.call.cpp',
+                        ]
+                        function_caller_2 = [
+                            'source.cpp',
+                        ]
+                    }
+    
+    
+                    if(
+                        (   (function_caller_1.every(scope => token.scopes.includes(scope)))||
+                            (function_caller_2.every(scope => token.scopes.includes(scope)))
+                        ) &&
+                        (is_inline==false)
+    
+                    )
+                    {
+                        if(line.substring(token.startIndex, token.endIndex)==caller_keyword)
+                        {
+                            if(has_pause_line)
+                                print_onto_console(pause_line, pause_start_index, -1, '', '', true);
+                            else if(to_put_into_previous_line)
+                                print_onto_console(previous_line, previous_index_to_put_log, -1, '', '', true);
+                            else
+                                // just print at current line, beginning index
+                                print_onto_console(i+1, 0, -1, '', '', true);
+                            
+                            has_pause_line = false;
+                            to_put_into_previous_line = false;
+                            has_special_index_to_put_log = false;
+    
+                        }
                     }
                 }
 

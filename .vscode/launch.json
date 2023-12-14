@@ -32,6 +32,19 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Textmate CPP Caller",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/textmateCaller.js",
+            "args": [
+                "./test/test1.cpp",
+                "main"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Textmate CPP",
             "skipFiles": [
                 "<node_internals>/**"
