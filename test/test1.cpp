@@ -7,6 +7,19 @@ int main()
 {
     int ret = main(a, b, c);
 
+#if defined (A)
+    main();
+// no such thing
+// #else if defined (B)
+//     main();
+#elif (C)
+    main();
+#elif defined (D) 
+    main();
+#else
+    main();
+#endif
+
 #ifdef A
     int x = main();
     if ()
@@ -16,7 +29,11 @@ int main()
     {
         main();
     }
+#elif B
+    main();
+
 #endif
+    Class::main();
 
     if()
         int ret = main(a, b, c);

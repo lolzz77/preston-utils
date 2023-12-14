@@ -508,6 +508,9 @@ registry.loadGrammar(param[0]).then(grammar => {
                     ]
                     keyword_scopes_3 = [
                         'meta.preprocessor.conditional',
+                        'keyword.control.directive.conditional.ifdef.cpp',
+                        'keyword.control.directive.else.cpp',
+                        'keyword.control.directive.endif.cpp',
                     ]
                 }
 

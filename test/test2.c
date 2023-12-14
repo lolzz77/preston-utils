@@ -14,6 +14,20 @@ inline int main()
 void main()
 {
     main();
+
+#if defined (A)
+    main();
+// no such thing
+// #else if defined (B)
+//     main();
+#elif (C)
+    main();
+#elif defined (D) 
+    main();
+#else
+    main();
+#endif
+
 #ifdef A
     int x = main();
     if ()
@@ -23,6 +37,9 @@ void main()
     {
         main();
     }
+#elif B
+    main();
+
 #endif
     main();
 
