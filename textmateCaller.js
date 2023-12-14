@@ -527,6 +527,7 @@ registry.loadGrammar(param[0]).then(grammar => {
                             'meta.preprocessor.conditional',
                             'keyword.control.directive.conditional.if.cpp',
                             'keyword.control.directive.conditional.ifdef.cpp',
+                            'keyword.control.directive.elif.cpp',
                             'keyword.control.directive.else.cpp',
                             'keyword.control.directive.endif.cpp',
                         ]
