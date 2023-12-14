@@ -229,11 +229,14 @@ registry.loadGrammar(param[0]).then(grammar => {
                         'meta.function.definition.parameters.c',
                         'entity.name.function.c'
                     ]
-                    if (
-                        function_1_scopes.every(scope => token.scopes.includes(scope))
-                    ) {
-                        setup_parameters = true;
-                    }
+                    // For those that doesn't have 2nd 3rd scopes
+                    // just put 'source.cpp' so later the 'every' function will match
+                    function_2_scopes = [
+                        'source.cpp',
+                    ]
+                    function_3_scopes = [
+                        'source.cpp',
+                    ]
                 }
                 else if (param[0] == 'source.cpp')
                 {
@@ -264,13 +267,14 @@ registry.loadGrammar(param[0]).then(grammar => {
                         'entity.name.scope-resolution.function.call.cpp'
                     ]
 
-                    if (
-                        function_1_scopes.every(scope => token.scopes.includes(scope))||
-                        function_2_scopes.every(scope => token.scopes.includes(scope))||
-                        function_3_scopes.every(scope => token.scopes.includes(scope))
-                    ) {
-                        setup_parameters = true;
-                    }
+                }
+
+                if (
+                    function_1_scopes.every(scope => token.scopes.includes(scope))||
+                    function_2_scopes.every(scope => token.scopes.includes(scope))||
+                    function_3_scopes.every(scope => token.scopes.includes(scope))
+                ) {
+                    setup_parameters = true;
                 }
 
                 if(setup_parameters)
@@ -496,14 +500,14 @@ registry.loadGrammar(param[0]).then(grammar => {
                 else if (param[0] == 'source.cpp')
                 {
                     keyword_scopes_1 = [
-                        'meta.block.c',
-                        'keyword.control.c'
+                        'keyword.control.if.cpp',
+                        'keyword.control.else.cpp'
                     ]
                     keyword_scopes_2 = [
-                        'keyword.control.switch.c'
+                        'keyword.control.switch.cpp'
                     ]
                     keyword_scopes_3 = [
-                        'meta.preprocessor.c',
+                        'meta.preprocessor.conditional',
                     ]
                 }
 
@@ -541,24 +545,31 @@ registry.loadGrammar(param[0]).then(grammar => {
 
                 let caller_keyword = param[2];
 
-
-                /***
-                 * Function caller scopes
-                 */
-                function_caller_1 = [
-                    'meta.block.c',
-                    'meta.function-call.c',
-                    'entity.name.function.c'
-                ]
-                // for function called under switch/case without if/else encapsulated
-                function_caller_2 = [
-                    'entity.name.function.c',
-                    'meta.function.definition.parameters.c',
-                    'meta.function.c',
-                    'meta.body.switch.c',
-                    'meta.block.switch.c',
-                    'meta.block.c'
-                ]
+                if (param[0] == 'source.c')
+                {
+                    /***
+                     * Function caller scopes
+                     */
+                    function_caller_1 = [
+                        'meta.block.c',
+                        'meta.function-call.c',
+                        'entity.name.function.c'
+                    ]
+                    // for function called under switch/case without if/else encapsulated
+                    function_caller_2 = [
+                        'entity.name.function.c',
+                        'meta.block.switch.c',
+                    ]
+                }
+                else if (param[0] == 'source.cpp')
+                {
+                    function_caller_1 = [
+                        'entity.name.function.call.cpp',
+                    ]
+                    function_caller_2 = [
+                        'source.cpp',
+                    ]
+                }
 
 
                 if(

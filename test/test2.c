@@ -1,5 +1,9 @@
 
 
+unsigned int _test[ 128 ] = {0};
+
+const uint32_t _list[] = { 0x1, 0x2, 0x3 };
+
 inline int main()
 {
     int a;
@@ -120,6 +124,11 @@ void main()
     switch (main(a, b, c))
     {
         int ret = main(a, b, c);
+
+        if()
+        {
+            int ret = main(a, b, c);
+        }
 
     case 1:
         int ret = main(a, b, c);
