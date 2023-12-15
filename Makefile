@@ -46,23 +46,27 @@ all: allFunc callerFunc semaphore
 
 experiment:
 	gcc -o experiment.out experiment.c -DNUM=2
+	# this is preprocessor processing
+	# go to experiemtnPreprocessorTest.c
+	# & check whether code wrapped within preprocessor `NUM` gets included or not
+	gcc -E -DNUM=3 experiment.c > experiemtnPreprocessorTest.c
 
 # append log on all files in repo
 allFunc:
-	gcc -g $(WAR) $(INC) -o allFuncExe allFunc.c $(FLAG)
+	gcc -g $(WAR) $(INC) -o allFuncExe.out allFunc.c $(FLAG)
 
 # Write log to caller functions
 callerFunc:
-	gcc -g $(WAR) $(INC) -o callerFuncExe callerFunc.c $(FLAG)
+	gcc -g $(WAR) $(INC) -o callerFuncExe.out callerFunc.c $(FLAG)
 
 # all files, but is for logging vr_capture_semevent
 semaphore:
-	gcc -g $(WAR) $(INC) -o semaphoreExe semaphore.c $(FLAG)
+	gcc -g $(WAR) $(INC) -o semaphoreExe.out semaphore.c $(FLAG)
 
 # run git reset --hard HEAD on all dir
 reset:
-	gcc -g $(WAR) $(INC) -o resetExe reset.c $(FLAG)
+	gcc -g $(WAR) $(INC) -o resetExe.out reset.c $(FLAG)
 
 # to test regex
 regexChecker:
-	gcc -g $(WAR) $(INC) -o regexCheckerExe regexChecker.c $(FLAG)
+	gcc -g $(WAR) $(INC) -o regexCheckerExe.out regexChecker.c $(FLAG)
