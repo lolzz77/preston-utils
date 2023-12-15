@@ -12,7 +12,8 @@
 
 #include "include.h"
 
-#define PUT_YOUR_SEARCH_KEYWORD_HERE   "\printf(\"ME\");\n"
+#define PUT_YOUR_SEARCH_KEYWORD_HERE   "\tprintf(\"ME\");\n"
+#define LOG_PUT_YOUR_SEARCH_KEYWORD_HERE   "\tprintf(\"ME\");\n"
 
 
 int read_line(char* file_to_open)
@@ -80,7 +81,7 @@ int read_line(char* file_to_open)
 
         if( strstr(line_read, "PUT_YOUR_SEARCH_KEYWORD_HERE"))
         {
-            ret = write_file_short(fp, file_to_open, temp, buffer, str_to_write, line_read, &prev_seek, &old_file_size, &new_file_size, &bytes_written, LOG_CAPTURE_SEM1);
+            ret = write_file_short(fp, file_to_open, temp, buffer, str_to_write, line_read, &prev_seek, &old_file_size, &new_file_size, &bytes_written, LOG_PUT_YOUR_SEARCH_KEYWORD_HERE);
             if(SUCCESS != ret)
             {
                 printf("%s:%d write file failed. Terminating program.\n", __FUNCTION__, __LINE__);
