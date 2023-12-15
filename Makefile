@@ -40,9 +40,9 @@ INC =
 # null for the moment
 WAR = 
 
-.PHONY: allFile fewFile reset oneFile allFileSem regexChecker allFileFewFunc
+.PHONY: experiment allFunc callerFunc semaphore reset regexChecker
 
-all: allFunc callerFunc semaphore
+all: experiment allFunc callerFunc semaphore reset regexChecker
 
 experiment:
 	gcc -o experiment.out experiment.c -DNUM=2
