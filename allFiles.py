@@ -64,8 +64,10 @@ for dir_path in dir_list:
 
             # lousy way to exclude from certain directory
             if 'testsuite' in str(path.parent):
+                print('skipping path: ' + str(path.parent))
                 continue
             if 'test' in str(path.parent):
+                print('skipping path: ' + str(path.parent))
                 continue
 
 
