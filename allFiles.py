@@ -8,6 +8,12 @@
 # To put log for caller function
 # python allFiles.py [repo_path/] caller [keyword]
 
+# Problem to solve:
+# 1. for cpp, if you put function name in newline,
+# that is, the return type is above, but function name is below
+# then the textmate scope for function name will be incorrect
+# it will be changed to function call
+
 import include
 import glob
 import os
