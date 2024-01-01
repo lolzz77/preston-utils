@@ -26,7 +26,7 @@ full_path = process.argv[2]
 file_exntension = full_path.substring(full_path.lastIndexOf('.') + 1);
 if(file_exntension == 'c')
     param[0] = 'source.c'
-else if(file_exntension == 'cpp')
+else if(file_exntension == 'cpp' || file_exntension == 'cc')
     param[0] = 'source.cpp'
 param[1] = full_path
 
@@ -166,6 +166,7 @@ registry.loadGrammar(param[0]).then(grammar => {
         let is_inline = false; // functino that has 'inline' keyword, cannot put log
         let setup_parameters = false;
         let is_function_definition = false; // to tell is the line currently in function body
+        let skip = false;
         
         /**
          * Whenever a function name is detected
@@ -193,6 +194,13 @@ registry.loadGrammar(param[0]).then(grammar => {
             // console.log(`\nTokenizing line: ${line}`);
             for (let j = 0; j < lineTokens.tokens.length; j++) {
                 const token = lineTokens.tokens[j];
+                // this token_str_debug is for debugging purposes, where u can add into watch n see what string
+                let token_str_debug = line.substring(token.startIndex, token.endIndex);
+                if (token_str_debug == 'c_parser_require')
+                {
+                    let x = 1
+                }
+
 
                 if (param[0] == 'source.c')
                 {
@@ -204,10 +212,30 @@ registry.loadGrammar(param[0]).then(grammar => {
                         'meta.function.definition.parameters.c',
                         'entity.name.function.c'
                     ]
+
+                    /****
+                     * Comments, 
+                     * strings in single/double quote
+                     * skip these, if not they will mess up with
+                     * () {} bracket counting
+                     */
+                    skip_1_scopes = [
+                        'comment.block.c',
+                        'comment.line.double-slash.c',
+                        'string.quoted.single.c',
+                        'string.quoted.double.c'
+                    ]
+                    
                     if (
                         function_1_scopes.every(scope => token.scopes.includes(scope))
                     ) {
                         setup_parameters = true;
+                    }
+
+                    if (
+                        skip_1_scopes.some(scope => token.scopes.includes(scope))
+                    ) {
+                        skip = true;
                     }
                 }
                 else if (param[0] == 'source.cpp')
@@ -239,6 +267,17 @@ registry.loadGrammar(param[0]).then(grammar => {
                         'entity.name.scope-resolution.function.call.cpp'
                     ]
 
+                    /****
+                     * Comments, 
+                     * strings in single/double quote
+                     */
+                    skip_1_scopes = [
+                        'comment.block.cpp',
+                        'comment.line.double-slash.cpp',
+                        'string.quoted.double.cpp',
+                        'string.quoted.single.cpp',
+                    ]
+
                     if (
                         function_1_scopes.every(scope => token.scopes.includes(scope))||
                         function_2_scopes.every(scope => token.scopes.includes(scope))||
@@ -246,6 +285,18 @@ registry.loadGrammar(param[0]).then(grammar => {
                     ) {
                         setup_parameters = true;
                     }
+
+                    if (
+                        skip_1_scopes.some(scope => token.scopes.includes(scope))
+                    ) {
+                        skip = true;
+                    }
+                }
+
+                if(skip)
+                {
+                    skip = false;
+                    continue;
                 }
 
                 if(setup_parameters)
