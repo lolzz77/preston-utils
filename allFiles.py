@@ -53,12 +53,22 @@ if len(sys.argv) > 3:
 
 for dir_path in dir_list:
 
-    for file_extension in include.FILE_EXTENSION:
+
+    for file_extension in include.FILE_EXTENSION_C:
 
         # for path provided in Path() and that matches the glob() recursively, open the file
         # Python will straight away get a list of matched FILE_EXTENSION from the path you provided, and is recursively
         # All those matched files, will be stored in this 'path' variable, and loop them
         for path in Path(dir_path).rglob('*'+file_extension):
+
+
+            # lousy way to exclude from certain directory
+            if 'testsuite' in str(path.parent):
+                continue
+            if 'test' in str(path.parent):
+                continue
+
+
             outputs = ''
 
             # 'cd path; git check-ignore -v filename'

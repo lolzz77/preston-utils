@@ -58,8 +58,9 @@ POSIX_regex_match = [
 
 FILE_EXTENSION_MAKEFILE = '*.mk'
 
-FILE_EXTENSION = [
+FILE_EXTENSION_C = [
     ".c",
+    ".cc",
     ".cpp"
 ]
 

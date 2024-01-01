@@ -200,7 +200,7 @@ char file_extension[256] = "\
 
 */
 // Use #define instead of char* pointer. Since I dont want this to be in array. All in one single string
-#define FILE_EXTENSION "[.c|.cpp]"
+#define FILE_EXTENSION_C "[.c|.cc|.cpp]"
 #define FILE_EXTENSION_MAKEFILE ".mk"
 
 #define FLAGS_TO_DELETE "-Wall"
