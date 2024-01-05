@@ -59,6 +59,35 @@ if len(sys.argv) > 3:
 
 for dir_path in dir_list:
 
+    if len(dir_list) == 1:
+        if option:
+            command = 'node ' + TEXTMATE_CALLER_FILE_PATH + ' ' + str(dir_path) + ' ' + str(caller_keyword)
+        else:
+            command = 'node ' + TEXTMATE_FILE_PATH + ' ' + str(dir_path)
+
+        outputs = subprocess.check_output(command, shell=True, universal_newlines=True)
+        if not outputs:
+            break
+
+        if outputs:
+            outputs = outputs.split('\n')
+
+        with open(str(dir_path), 'r') as file:
+            data = file.readlines()
+
+            data[0] = LIBRARY_TO_INCLUDE + data[0]
+            for output in outputs:
+                split = output.split(':')
+                if split[0] == '':
+                    continue
+                corrected_line_inedx = int(split[0]) - 1
+                string_index = int(split[1]) + 1
+                data[corrected_line_inedx] = data[corrected_line_inedx][:string_index] + LOG_TO_WRITE + data[corrected_line_inedx][string_index:]
+
+        with open(str(dir_path), 'w') as file:
+            file.writelines(data)
+        
+        break
 
     for file_extension in include.FILE_EXTENSION_C:
 
@@ -67,8 +96,8 @@ for dir_path in dir_list:
         # All those matched files, will be stored in this 'path' variable, and loop them
         for path in Path(dir_path).rglob('*'+file_extension):
 
-
             # lousy way to exclude from certain directory
+            # vscode debugger, gi_frame -> f_locals -> p -> parent
             if 'testsuite' in str(path.parent):
                 print('skipping path: ' + str(path.parent))
                 continue

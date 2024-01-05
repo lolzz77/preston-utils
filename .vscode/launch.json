@@ -57,10 +57,19 @@
         {
             "type": "python",
             "request": "launch",
-            "name": "Python - Function Definition",
+            "name": "Python - Log to Dir, All Functions",
             "program": "${workspaceFolder}/allFiles.py",
             "args": [
                 "./test/"
+            ]
+        },
+        {
+            "type": "python",
+            "request": "launch",
+            "name": "Python - Log to single file, All Functions",
+            "program": "${workspaceFolder}/allFiles.py",
+            "args": [
+                "./test/test1.c"
             ]
         },
         {
