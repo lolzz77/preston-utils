@@ -10,7 +10,7 @@ import lex
 class LexTestCase(unittest.TestCase):
     def test_lex(self):
         test_cases = [
-            [
+            [#0
                 [   # test case
                     'i', 
                     'int main()', 
@@ -24,7 +24,7 @@ class LexTestCase(unittest.TestCase):
                     }
                 ]
             ],
-            [
+            [#1
                 [
                     '(', 
                     'int main()', 
@@ -38,7 +38,7 @@ class LexTestCase(unittest.TestCase):
                     }
                 ]
             ],
-            [
+            [#2
                 [
                     '.', 
                     '...', 
@@ -52,7 +52,7 @@ class LexTestCase(unittest.TestCase):
                     }
                 ]
             ],
-            [
+            [#3
                 [
                     '.', 
                     '..', 
@@ -66,6 +66,48 @@ class LexTestCase(unittest.TestCase):
                     }
                 ]
             ],
+            [#4
+                [
+                    ' ', 
+                    'int main()', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                    {
+                        "char" : ' ',
+                        "flag" : lex.CPP_Flag.NONE,
+                        "type" : lex.CPPType.CPP_WHITESPACE
+                    }
+                ]
+            ],
+            [#5
+                [
+                    '\t', 
+                    'int main()', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                    {
+                        "char" : '\t',
+                        "flag" : lex.CPP_Flag.NONE,
+                        "type" : lex.CPPType.CPP_WHITESPACE
+                    }
+                ]
+            ],
+            [#6
+                [
+                    '\'', 
+                    'int main()', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                    {
+                        "char" : '\'',
+                        "flag" : lex.CPP_Flag.NONE,
+                        "type" : lex.CPPType.CPP_STRING_SINGLE_QUOTE
+                    }
+                ]
+            ],
         ]
 
         # doing this way, it will output which test case failed
@@ -73,7 +115,6 @@ class LexTestCase(unittest.TestCase):
         for i, test_case in enumerate(test_cases):
             test_result = lex.lex(test_case[0][0], test_case[0][1], test_case[0][2])
             with self.subTest(i=i):
-                print(f'Running test case {i}')
                 self.assertEqual(
                     Counter(test_result), 
                     Counter(test_case[1][0])
