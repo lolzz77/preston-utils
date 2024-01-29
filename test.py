@@ -25,12 +25,12 @@ class LexTestCase(unittest.TestCase):
                 ]
             ],
             [
-                [   # test case
+                [
                     '(', 
                     'int main()', 
                     lex.CPPOption.NONE
                 ],
-                [   # test result
+                [
                     {
                         "char" : '(',
                         "flag" : lex.CPP_Flag.NONE,
@@ -39,16 +39,30 @@ class LexTestCase(unittest.TestCase):
                 ]
             ],
             [
-                [   # test case
+                [
                     '.', 
                     '...', 
                     lex.CPPOption.NONE
                 ],
-                [   # test result
+                [
                     {
                         "char" : '.',
                         "flag" : lex.CPP_Flag.NONE,
                         "type" : lex.CPPType.CPP_ELLIPSIS
+                    }
+                ]
+            ],
+            [
+                [
+                    '.', 
+                    '..', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                    {
+                        "char" : '.',
+                        "flag" : lex.CPP_Flag.NONE,
+                        "type" : lex.CPPType.CPP_DOT
                     }
                 ]
             ],
@@ -57,9 +71,9 @@ class LexTestCase(unittest.TestCase):
         # doing this way, it will output which test case failed
         # 1st index is 0
         for i, test_case in enumerate(test_cases):
-            test_result = {}
             test_result = lex.lex(test_case[0][0], test_case[0][1], test_case[0][2])
             with self.subTest(i=i):
+                print(f'Running test case {i}')
                 self.assertEqual(
                     Counter(test_result), 
                     Counter(test_case[1][0])

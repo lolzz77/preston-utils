@@ -110,7 +110,6 @@ class CPPOption(Enum):
 
 
 
-
 def lex(c, s, cpp_option):
 	"""
 	c 	- the current single character
@@ -131,6 +130,14 @@ def lex(c, s, cpp_option):
 	result['char'] = c
 	result['flag'] = CPP_Flag.NONE
 	result['type'] = CPPType.CPP_NONE
+	next_char = ''
+	next_next_char = ''
+
+	if len(s) > 1:
+		next_char = s[1]
+
+	if len(s) > 2:
+		next_next_char = s[2]
 
 	if c in [' ', '\t', '\f', '\v', '\0']:
 		result['type'] = CPPType.CPP_WHITESPACE
@@ -170,7 +177,6 @@ def lex(c, s, cpp_option):
 		pass
 
 	elif c == '/':
-		next_char = s[1]
 		if next_char == '*':
 			result['type'] = CPPType.CPP_MULTILINE_COMMENT
 		elif next_char == '/':
@@ -181,7 +187,6 @@ def lex(c, s, cpp_option):
 			result['type'] = CPPType.CPP_DIV
 
 	elif c == '<':
-		next_char = s[1]
 		result['type'] = CPPType.CPP_LESS
 		if next_char == '=':
 			result['type'] = CPPType.CPP_LESS_EQ
@@ -201,7 +206,6 @@ def lex(c, s, cpp_option):
 				result['type'] = CPPType.CPP_OPEN_BRACE
 
 	elif c == '>':
-		next_char = s[1]
 		result['type'] = 'CPP_GREATER'
 		if next_char == '=':
 			result['type'] = CPPType.CPP_GREATER_EQ
@@ -212,8 +216,6 @@ def lex(c, s, cpp_option):
 				result['type'] = CPPType.CPP_RSHIFT
 
 	elif c == '%':
-		next_char = s[1]
-		next_next_char = s[2]
 		result['type'] = CPPType.CPP_MOD
 		if next_char == '=':
 			result['type'] = CPPType.CPP_MOD_EQ
@@ -229,18 +231,15 @@ def lex(c, s, cpp_option):
 				result['type'] = CPPType.CPP_CLOSE_BRACE
 
 	elif c == '.':
-		next_char = s[1]
-		next_next_char = s[2]
 		result['type'] = CPPType.CPP_DOT
 		if next_char.isdigit():
 			result['type'] = CPPType.CPP_NUMBER
 		elif next_char == '.' and next_next_char == '.':
 			result['type'] = CPPType.CPP_ELLIPSIS
-		elif next_char == '*' and CPPOption.C_PLUS_PLUS:
+		elif next_char == '*' and cpp_option == CPPOption.C_PLUS_PLUS:
 			result['type'] = CPPType.CPP_DOT_STAR
 
 	elif c == '+':
-		next_char = s[1]
 		result['type'] = CPPType.CPP_PLUS
 		if next_char == '+':
 			result['type'] = CPPType.CPP_PLUS_PLUS
@@ -248,11 +247,10 @@ def lex(c, s, cpp_option):
 			result['type'] = CPPType.CPP_PLUS_EQ
 
 	elif c == '-':
-		next_char = s[1]
 		result['type'] = CPPType.CPP_MINUS
 		if next_char == '>':
 			result['type'] = CPPType.CPP_DEREF
-			if next_char == '*' and CPPOption.C_PLUS_PLUS:
+			if next_char == '*' and cpp_option == CPPOption.C_PLUS_PLUS:
 				result['type'] = CPPType.CPP_DEREF_STAR
 		elif next_char == '-':
 			result['type'] = CPPType.CPP_MINUS_MINUS
@@ -260,7 +258,6 @@ def lex(c, s, cpp_option):
 			result['type'] = CPPType.CPP_MINUS_EQ
 
 	elif c == '&':
-		next_char = s[1]
 		result['type'] = CPPType.CPP_AND
 		if next_char == '&':
 			result['type'] = CPPType.CPP_AND_AND
@@ -268,7 +265,6 @@ def lex(c, s, cpp_option):
 			result['type'] = CPPType.CPP_AND_EQ
 
 	elif c == '|':
-		next_char = s[1]
 		result['type'] = CPPType.CPP_OR
 		if next_char == '|':
 			result['type'] = CPPType.CPP_OR_OR
@@ -276,44 +272,38 @@ def lex(c, s, cpp_option):
 			result['type'] = CPPType.CPP_OR_EQ
 
 	elif c == ':':
-		next_char = s[1]
 		result['type'] = CPPType.CPP_COLON
-		if next_char == ':' and CPPOption.SCOPE:
+		if next_char == ':' and cpp_option == CPPOption.SCOPE:
 			result['type'] = CPPType.CPP_SCOPE
-		elif next_char == '>' and CPPOption.DIGRAPHS:
+		elif next_char == '>' and cpp_option == CPPOption.DIGRAPHS:
 			result['flags'] |= CPP_Flag.DIGRAPH
 			result['type'] = CPPType.CPP_CLOSE_SQUARE
 
 	elif c == '*':
-		next_char = s[1]
 		if next_char == '=':  # assuming buffer is a list-like object and cur is the current index
 			result['type'] = CPPType.CPP_MULT_EQ
 		else:
 			result['type'] = CPPType.CPP_MULT
 
 	elif c == '=':
-		next_char = s[1]
 		if next_char == '=':
 			result['type'] = CPPType.CPP_EQ_EQ
 		else:
 			result['type'] = CPPType.CPP_EQ
 
 	elif c == '!':
-		next_char = s[1]
 		if next_char == '=':
 			result['type'] = CPPType.CPP_NOT_EQ
 		else:
 			result['type'] = CPPType.CPP_NOT
 
 	elif c == '^':
-		next_char = s[1]
 		if next_char == '=':
 			result['type'] = CPPType.CPP_XOR_EQ
 		else:
 			result['type'] = CPPType.CPP_XOR
 
 	elif c == '#':
-		next_char = s[1]
 		if next_char == '#':
 			result['type'] = CPPType.CPP_PASTE
 		else:
