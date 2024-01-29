@@ -15,12 +15,16 @@ from enum import Enum
 # 'python allFileMakefile.py repo'
 # then when u put this code 'print(len(sys.argv))'
 # will output 2
-if(len(sys.argv) < 2):
-	print("Wrong argument. Terminating script.")
-	sys.exit()
 
-dir_list = []
-dir_list.append(sys.argv[1])
+# this means, only run this if this file is directly called from terminal
+# not from imported module
+if __name__ == "__main__":
+	if(len(sys.argv) < 2):
+		print("Wrong argument. Terminating script.")
+		sys.exit()
+
+	dir_list = []
+	dir_list.append(sys.argv[1])
 
 
 class CPPType(Enum):
@@ -118,7 +122,13 @@ def lex(c, s, cpp_option):
 		- so far, only need 2 next char, so, maybe u can pass in maximum of length 3 of 's' parameter
 	cpp_option - the compiling option (eg: compile trigraph? compile as CPP? etc)
 	"""
+
+	# This is for if u lex-ed more than 1 character, for example, '!='
+	# this means, the 1st char & 2nd char are lex-ed, and can skip
+	# update: this should be handled by caller
+
 	result = {}
+	result['char'] = c
 	result['flag'] = CPP_Flag.NONE
 	result['type'] = CPPType.CPP_NONE
 
