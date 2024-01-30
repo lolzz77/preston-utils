@@ -120,6 +120,46 @@ class LexTestCase(unittest.TestCase):
                     Counter(test_case[1][0])
                 )
 
+    def test_lex_string(self):
+        test_cases = [
+            # [#0
+            #     [   # test case
+            #         'int main()', 
+            #         lex.CPPOption.NONE
+            #     ],
+            #     [   # test result
+            #         {
+            #             "char" : 'i',
+            #             "flag" : lex.CPP_Flag.NONE,
+            #             "type" : lex.CPPType.CPP_NAME
+            #         }
+            #     ]
+            # ],
+            [#1
+                [
+                    '(...)', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                    {
+                        "char" : 'i',
+                        "flag" : lex.CPP_Flag.NONE,
+                        "type" : lex.CPPType.CPP_NAME
+                    }
+                ]
+            ],
+        ]
+
+        for i, test_case in enumerate(test_cases):
+            test_result = lex.lex_string(test_case[0][0], test_case[0][1])
+            with self.subTest(i=i):
+                pass
+                # self.assertEqual(
+                #     Counter(test_result), 
+                #     Counter(test_case[1][0])
+                # )
+
+
 if __name__ == '__main__':
     unittest.main()
 

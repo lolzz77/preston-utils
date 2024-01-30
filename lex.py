@@ -26,6 +26,39 @@ if __name__ == "__main__":
 	dir_list = []
 	dir_list.append(sys.argv[1])
 
+# +1 char
+# CPP_MULTILINE_COMMENT
+# CPP_SINGLE_LINE_COMMENT
+# CPP_DIV_EQ
+# CPP_LESS_EQ
+# CPP_LSHIFT
+# CPP_GREATER_EQ
+# CPP_RSHIFT
+# CPP_MOD_EQ
+# CPP_NUMBER
+# CPP_DOT_STAR
+# CPP_PLUS_PLUS
+# CPP_PLUS_EQ
+# CPP_DEREF
+# CPP_MINUS_MINUS
+# CPP_MINUS_EQ
+# CPP_AND_AND
+# CPP_AND_EQ
+# CPP_OR_OR
+# CPP_OR_EQ
+# CPP_SCOPE
+# CPP_MULT_EQ
+# CPP_EQ_EQ
+# CPP_NOT_EQ
+# CPP_XOR_EQ
+# CPP_PASTE
+
+# +2 char
+# CPP_SPACESHIP
+# CPP_LSHIFT_EQ
+# CPP_RSHIFT_EQ
+# CPP_ELLIPSIS
+# CPP_DEREF_STAR
 
 class CPPType(Enum):
 	CPP_NONE			= 0
@@ -46,49 +79,50 @@ class CPPType(Enum):
 	CPP_LSHIFT			= 15
 	CPP_OPEN_SQUARE		= 16
 	CPP_OPEN_BRACE		= 17
-	CPP_GREATER_EQ		= 18
-	CPP_RSHIFT_EQ		= 19
-	CPP_RSHIFT			= 20
-	CPP_MOD				= 21
-	CPP_MOD_EQ			= 22
-	CPP_HASH			= 23
-	CPP_PASTE			= 24
-	CPP_CLOSE_BRACE		= 25
-	CPP_DOT				= 26
-	CPP_ELLIPSIS		= 27
-	CPP_DOT_STAR		= 28
-	CPP_PLUS			= 29
-	CPP_PLUS_PLUS		= 30
-	CPP_PLUS_EQ			= 31
-	CPP_MINUS			= 32
-	CPP_DEREF			= 33
-	CPP_DEREF_STAR		= 34
-	CPP_MINUS_MINUS		= 35
-	CPP_MINUS_EQ		= 36
-	CPP_AND				= 37
-	CPP_AND_AND			= 38
-	CPP_AND_EQ			= 39
-	CPP_OR				= 40
-	CPP_OR_OR			= 41
-	CPP_OR_EQ			= 42
-	CPP_COLON			= 43
-	CPP_SCOPE			= 44
-	CPP_CLOSE_SQUARE	= 45
-	CPP_MULT_EQ			= 46
-	CPP_MULT			= 47
-	CPP_EQ_EQ			= 48
-	CPP_EQ				= 49
-	CPP_NOT_EQ			= 50
-	CPP_NOT				= 51
-	CPP_XOR_EQ			= 52
-	CPP_XOR				= 53
-	CPP_QUERY			= 54
-	CPP_COMPL			= 55
-	CPP_COMMA			= 56
-	CPP_OPEN_PAREN		= 57
-	CPP_CLOSE_PAREN		= 58
-	CPP_SEMICOLON		= 59
-	CPP_OTHER			= 60
+	CPP_GREATER			= 18
+	CPP_GREATER_EQ		= 19
+	CPP_RSHIFT_EQ		= 20
+	CPP_RSHIFT			= 21
+	CPP_MOD				= 22
+	CPP_MOD_EQ			= 23
+	CPP_HASH			= 24
+	CPP_PASTE			= 25
+	CPP_CLOSE_BRACE		= 26
+	CPP_DOT				= 27
+	CPP_ELLIPSIS		= 28
+	CPP_DOT_STAR		= 29
+	CPP_PLUS			= 30
+	CPP_PLUS_PLUS		= 31
+	CPP_PLUS_EQ			= 32
+	CPP_MINUS			= 33
+	CPP_DEREF			= 34
+	CPP_DEREF_STAR		= 35
+	CPP_MINUS_MINUS		= 36
+	CPP_MINUS_EQ		= 37
+	CPP_AND				= 38
+	CPP_AND_AND			= 39
+	CPP_AND_EQ			= 40
+	CPP_OR				= 41
+	CPP_OR_OR			= 42
+	CPP_OR_EQ			= 43
+	CPP_COLON			= 44
+	CPP_SCOPE			= 45
+	CPP_CLOSE_SQUARE	= 46
+	CPP_MULT_EQ			= 47
+	CPP_MULT			= 48
+	CPP_EQ_EQ			= 49
+	CPP_EQ				= 50
+	CPP_NOT_EQ			= 51
+	CPP_NOT				= 52
+	CPP_XOR_EQ			= 53
+	CPP_XOR				= 54
+	CPP_QUERY			= 55
+	CPP_COMPL			= 56
+	CPP_COMMA			= 57
+	CPP_OPEN_PAREN		= 58
+	CPP_CLOSE_PAREN		= 59
+	CPP_SEMICOLON		= 60
+	CPP_OTHER			= 61
 
 class CPP_Flag(Enum):
 	NONE 		= 0
@@ -110,10 +144,14 @@ class CPPOption(Enum):
 
 
 
-def lex(c, s, cpp_option):
+def lex(c, string, cpp_option):
 	"""
+	index 	- the 'c' index in the 's' parameter
+			- eg: s = 'int main()'
+			- c = m
+			- then, index = 4
 	c 	- the current single character
-	s 	- the full string, after the 'c' parameter
+	string 	- the full string, after the 'c' parameter
 		- eg: full string = 'int main()'
 		- c = 'm'
 		- then, s = 'ain()'
@@ -132,12 +170,16 @@ def lex(c, s, cpp_option):
 	result['type'] = CPPType.CPP_NONE
 	next_char = ''
 	next_next_char = ''
+	next_next_next_char = ''
 
-	if len(s) > 1:
-		next_char = s[1]
+	if len(string) > 1:
+		next_char = string[1]
 
-	if len(s) > 2:
-		next_next_char = s[2]
+	if len(string) > 2:
+		next_next_char = string[2]
+
+	if len(string) > 3:
+		next_next_next_char = string[3]
 
 	if c in [' ', '\t', '\f', '\v', '\0']:
 		result['type'] = CPPType.CPP_WHITESPACE
@@ -190,10 +232,10 @@ def lex(c, s, cpp_option):
 		result['type'] = CPPType.CPP_LESS
 		if next_char == '=':
 			result['type'] = CPPType.CPP_LESS_EQ
-			if next_char == '>':
+			if next_next_char == '>':
 				result['type'] = CPPType.CPP_SPACESHIP
 		elif next_char == '<':
-			if next_char == '=':
+			if next_next_char == '=':
 				result['type'] = CPPType.CPP_LSHIFT_EQ
 			else:
 				result['type'] = CPPType.CPP_LSHIFT
@@ -206,11 +248,11 @@ def lex(c, s, cpp_option):
 				result['type'] = CPPType.CPP_OPEN_BRACE
 
 	elif c == '>':
-		result['type'] = 'CPP_GREATER'
+		result['type'] = CPPType.CPP_GREATER
 		if next_char == '=':
 			result['type'] = CPPType.CPP_GREATER_EQ
 		elif next_char == '>':
-			if next_char == '=':
+			if next_next_char == '=':
 				result['type'] = CPPType.CPP_RSHIFT_EQ
 			else:
 				result['type'] = CPPType.CPP_RSHIFT
@@ -223,9 +265,11 @@ def lex(c, s, cpp_option):
 			if next_char == ':':
 				result['flags'] |= CPP_Flag.DIGRAPH
 				result['type'] = CPPType.CPP_HASH
-				if next_char == '%' and next_next_char == ':':
+				# This means double hash, 
+				# `%:` = #, `%:%:` = ##
+				# Double hash = CPP_PASTE
+				if next_next_char == '%' and next_next_next_char == ':':
 					result['type'] = CPPType.CPP_PASTE
-					result['val']['token_no'] = 0  # assuming result['val'] is a dictionary
 			elif next_char == '>':
 				result['flags'] |= CPP_Flag.DIGRAPH
 				result['type'] = CPPType.CPP_CLOSE_BRACE
@@ -250,7 +294,7 @@ def lex(c, s, cpp_option):
 		result['type'] = CPPType.CPP_MINUS
 		if next_char == '>':
 			result['type'] = CPPType.CPP_DEREF
-			if next_char == '*' and cpp_option == CPPOption.C_PLUS_PLUS:
+			if next_next_char == '*' and cpp_option == CPPOption.C_PLUS_PLUS:
 				result['type'] = CPPType.CPP_DEREF_STAR
 		elif next_char == '-':
 			result['type'] = CPPType.CPP_MINUS_MINUS
@@ -308,7 +352,6 @@ def lex(c, s, cpp_option):
 			result['type'] = CPPType.CPP_PASTE
 		else:
 			result['type'] = CPPType.CPP_HASH
-		result['val']['token_no'] = 0
 
 	elif c in ['?', '~', ',', '(', ')', '[', ']', '{', '}', ';']:
 		result['type'] = {
@@ -329,3 +372,14 @@ def lex(c, s, cpp_option):
 
 
 	return result
+
+
+def lex_string(string, cpp_option):
+	arr_arr = []
+	for i, char in enumerate(string):
+		temp_string = string[i:]
+		arr = lex(char, temp_string, cpp_option)
+		arr_arr.append(arr)
+
+	for arr in arr_arr:
+		print(arr)

@@ -82,6 +82,12 @@
                 "caller",
                 "main"
             ]
-        }
+        },
+        {
+            "type": "python",
+            "request": "launch",
+            "name": "Python - Unit Test",
+            "program": "${workspaceFolder}/test.py",
+        },
     ]
 }
