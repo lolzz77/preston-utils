@@ -288,6 +288,47 @@ class LexTestCase(unittest.TestCase):
                 )
 
 
+    def test_group_lex(self):
+        test_cases = [
+            [#0
+                [   # test case
+                    'int main ()', 
+                    lex.CPPOption.NONE
+                ],
+                [   # test result
+                    {
+                        "word" : 'int',
+                        "flag" : lex.CPP_Flag.NONE,
+                        "type" : lex.CPPType.CPP_NAME
+                    },
+                    {
+                        "word" : ' ',
+                        "flag" : lex.CPP_Flag.NONE,
+                        "type" : lex.CPPType.CPP_WHITESPACE
+                    },
+                    {
+                        "word" : 'main',
+                        "flag" : lex.CPP_Flag.NONE,
+                        "type" : lex.CPPType.CPP_NAME
+                    },
+                    {
+                        "word" : '()',
+                        "flag" : lex.CPP_Flag.NONE,
+                        "type" : lex.CPPType.CPP_PARENTHESIS
+                    },
+                ]
+            ],
+        ]
+
+        for i, test_case in enumerate(test_cases):
+            test_result = lex.group_lex(test_case[0][0], test_case[0][1])
+            with self.subTest(i=i):
+                self.assertEqual(
+                    test_result, 
+                    test_case[1]
+                )
+
+
 if __name__ == '__main__':
     unittest.main()
 

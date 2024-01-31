@@ -91,6 +91,9 @@ class CPPType(enum.Enum):
 	CPP_SEMICOLON = enum.auto()
 	CPP_OTHER = enum.auto()
 
+	# Below here is i self add one
+	CPP_PARENTHESIS = enum.auto()
+
 
 class CPP_Flag(enum.Enum):
 	"""
@@ -448,7 +451,7 @@ class CPPReserved(enum.Enum):
 
 # The last element is 'disable' in original code
 # But i just change to 0 for the moment, i dk got what use
-c_common_reswords = [
+c_reserved_words = [
 	{ "_Alignas",			CPPReserved.RID_ALIGNAS,   0 },
 	{ "_Alignof",			CPPReserved.RID_ALIGNOF,   0 },
 	{ "_Atomic",			CPPReserved.RID_ATOMIC,    0 },
@@ -606,6 +609,11 @@ c_common_reswords = [
 	{ "volatile",		CPPReserved.RID_VOLATILE,	0 },
 	{ "wchar_t",		CPPReserved.RID_WCHAR,	0 },
 	{ "while",			CPPReserved.RID_WHILE,	0 },
+]
+
+c_syntax = [
+	# Function definition, if got numbers, can skip, as long as it is not starting with numbers
+	{CPPType.CPP_NAME, CPPType.CPP_WHITESPACE, CPPType.CPP_NAME, CPPType.CPP_WHITESPACE or CPPType.CPP_OPEN_PAREN}
 ]
 
 def lex(c, string, cpp_option):
@@ -851,6 +859,52 @@ def lex_string(string, cpp_option):
 	print(string)
 	for arr in arr_arr:
 		print(arr)
+
+def group_lex(string, cpp_option):
+	"""
+	given a string, with each token lexed
+	eg: int8 main()
+	i -> CPP_NAME
+	n -> CPP_NAME
+	t -> CPP_NAME
+	8 -> CPP_NUMBER
+	make it like
+	int8 -> CPP_NAME
+	main -> CPP_NAME
+	() -> CPP_PARENTHESIS
+	"""
+	group_lex = []
+	temp_string = ''
+	wait_for_breaker = False
+	arr_type = -1
+
+	arr_arr = lex_string(string, cpp_option)
+
+	for i, arr in enumerate(arr_arr):
+		if arr['type'] == CPPType.CPP_WHITESPACE:
+			group_lex.append(
+				{
+					'word': temp_string[:i],
+					'type': arr_type
+				}
+			)
+			arr_type = -1
+			temp_string = ''
+			wait_for_breaker = False
+			continue
+
+		temp_string += arr['char']
+
+		if wait_for_breaker = True:
+			continue
+
+		if arr['type'] == CPPType.CPP_NAME:
+			if arr_type == -1:
+				arr_type = arr['type']
+			wait_for_breaker = True
+			continue
+
+
 
 def decide():
 	"""
