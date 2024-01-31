@@ -381,5 +381,8 @@ def lex_string(string, cpp_option):
 		arr = lex(char, temp_string, cpp_option)
 		arr_arr.append(arr)
 
+	return arr_arr
+
+	print()
 	for arr in arr_arr:
 		print(arr)
