@@ -26,39 +26,7 @@ if __name__ == "__main__":
 	dir_list = []
 	dir_list.append(sys.argv[1])
 
-# +1 char
-# CPP_MULTILINE_COMMENT
-# CPP_SINGLE_LINE_COMMENT
-# CPP_DIV_EQ
-# CPP_LESS_EQ
-# CPP_LSHIFT
-# CPP_GREATER_EQ
-# CPP_RSHIFT
-# CPP_MOD_EQ
-# CPP_NUMBER
-# CPP_DOT_STAR
-# CPP_PLUS_PLUS
-# CPP_PLUS_EQ
-# CPP_DEREF
-# CPP_MINUS_MINUS
-# CPP_MINUS_EQ
-# CPP_AND_AND
-# CPP_AND_EQ
-# CPP_OR_OR
-# CPP_OR_EQ
-# CPP_SCOPE
-# CPP_MULT_EQ
-# CPP_EQ_EQ
-# CPP_NOT_EQ
-# CPP_XOR_EQ
-# CPP_PASTE
 
-# +2 char
-# CPP_SPACESHIP
-# CPP_LSHIFT_EQ
-# CPP_RSHIFT_EQ
-# CPP_ELLIPSIS
-# CPP_DEREF_STAR
 
 class CPPType(Enum):
 	CPP_NONE			= 0
@@ -125,10 +93,6 @@ class CPPType(Enum):
 	CPP_OTHER			= 61
 
 class CPP_Flag(Enum):
-	NONE 		= 0
-	DIGRAPH 	= 1
-
-class CPPOption(Enum):
 	"""
 	flags should be bit-wised
 	1 = 0001
@@ -137,19 +101,19 @@ class CPPOption(Enum):
 	8 = 1000
 	and so on
 	"""
+	NONE 		= 1
+	DIGRAPH 	= 2
+
+class CPPOption(Enum):
 	NONE		= 0
 	DIGRAPHS	= 1
 	C_PLUS_PLUS	= 2
-	SCOPE		= 4
+	SCOPE		= 3
 
 
 
 def lex(c, string, cpp_option):
 	"""
-	index 	- the 'c' index in the 's' parameter
-			- eg: s = 'int main()'
-			- c = m
-			- then, index = 4
 	c 	- the current single character
 	string 	- the full string, after the 'c' parameter
 		- eg: full string = 'int main()'
@@ -375,14 +339,64 @@ def lex(c, string, cpp_option):
 
 
 def lex_string(string, cpp_option):
+	"""
+	Lex a string, under this function,
+	it will lex each token.
+	"""
 	arr_arr = []
 	for i, char in enumerate(string):
 		temp_string = string[i:]
 		arr = lex(char, temp_string, cpp_option)
 		arr_arr.append(arr)
 
-	return arr_arr
+	# return arr_arr
 
 	print()
+	print(string)
 	for arr in arr_arr:
 		print(arr)
+
+def decide():
+	"""
+	Given result from lex_string
+	This function decides what kind of syntaxes the string is
+	eg: string = int main(){}
+	syntaxes = function definition
+
+	eg2: #include <stdio.h>
+	stntaxes = include
+
+	+1 char
+	CPP_MULTILINE_COMMENT
+	CPP_SINGLE_LINE_COMMENT
+	CPP_DIV_EQ
+	CPP_LESS_EQ
+	CPP_LSHIFT
+	CPP_GREATER_EQ
+	CPP_RSHIFT
+	CPP_MOD_EQ
+	CPP_NUMBER
+	CPP_DOT_STAR
+	CPP_PLUS_PLUS
+	CPP_PLUS_EQ
+	CPP_DEREF
+	CPP_MINUS_MINUS
+	CPP_MINUS_EQ
+	CPP_AND_AND
+	CPP_AND_EQ
+	CPP_OR_OR
+	CPP_OR_EQ
+	CPP_SCOPE
+	CPP_MULT_EQ
+	CPP_EQ_EQ
+	CPP_NOT_EQ
+	CPP_XOR_EQ
+	CPP_PASTE
+
+	+2 char
+	CPP_SPACESHIP
+	CPP_LSHIFT_EQ
+	CPP_RSHIFT_EQ
+	CPP_ELLIPSIS
+	CPP_DEREF_STAR
+	"""

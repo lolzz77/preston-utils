@@ -251,6 +251,32 @@ class LexTestCase(unittest.TestCase):
                     }
                 ]
             ],
+            [#3
+                [
+                    '#define ABC 123', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                    {
+                        "char" : 'x',
+                        "flag" : lex.CPP_Flag.NONE,
+                        "type" : lex.CPPType.CPP_NAME
+                    },
+                ]
+            ],
+            [#4
+                [
+                    '#include <stdio.h>', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                    {
+                        "char" : 'x',
+                        "flag" : lex.CPP_Flag.NONE,
+                        "type" : lex.CPPType.CPP_NAME
+                    },
+                ]
+            ],
         ]
 
         for i, test_case in enumerate(test_cases):
