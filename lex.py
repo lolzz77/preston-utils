@@ -19,7 +19,7 @@ from enum import Enum
 # this means, only run this if this file is directly called from terminal
 # not from imported module
 if __name__ == "__main__":
-	if(len(sys.argv) < 2):
+	if (len(sys.argv) < 2):
 		print("Wrong argument. Terminating script.")
 		sys.exit()
 
@@ -27,70 +27,70 @@ if __name__ == "__main__":
 	dir_list.append(sys.argv[1])
 
 
-
 class CPPType(Enum):
 	CPP_NONE = 0
-	CPP_WHITESPACE 	
-	CPP_NEWLINE 	
-	CPP_NUMBER 		
-	CPP_NAME 		
+	CPP_WHITESPACE
+	CPP_NEWLINE
+	CPP_NUMBER
+	CPP_NAME
 	CPP_STRING_SINGLE_QUOTE
 	CPP_STRING_DOUBLE_QUOTE
-	CPP_MULTILINE_COMMENT 
+	CPP_MULTILINE_COMMENT
 	CPP_SINGLE_LINE_COMMENT
-	CPP_DIV_EQ		
-	CPP_DIV				
-	CPP_LESS			
-	CPP_LESS_EQ			
-	CPP_SPACESHIP		
-	CPP_LSHIFT_EQ		
-	CPP_LSHIFT			
-	CPP_OPEN_SQUARE		
-	CPP_OPEN_BRACE		
-	CPP_GREATER			
-	CPP_GREATER_EQ		
-	CPP_RSHIFT_EQ		
-	CPP_RSHIFT			
-	CPP_MOD				
-	CPP_MOD_EQ			
-	CPP_HASH			
-	CPP_PASTE			
-	CPP_CLOSE_BRACE		
-	CPP_DOT				
-	CPP_ELLIPSIS		
-	CPP_DOT_STAR		
-	CPP_PLUS			
-	CPP_PLUS_PLUS		
-	CPP_PLUS_EQ			
-	CPP_MINUS			
-	CPP_DEREF			
-	CPP_DEREF_STAR		
-	CPP_MINUS_MINUS		
-	CPP_MINUS_EQ		
-	CPP_AND				
-	CPP_AND_AND			
-	CPP_AND_EQ			
-	CPP_OR				
-	CPP_OR_OR			
-	CPP_OR_EQ			
-	CPP_COLON			
-	CPP_SCOPE			
-	CPP_CLOSE_SQUARE	
-	CPP_MULT_EQ			
-	CPP_MULT			
-	CPP_EQ_EQ			
-	CPP_EQ				
-	CPP_NOT_EQ			
-	CPP_NOT				
-	CPP_XOR_EQ			
-	CPP_XOR				
-	CPP_QUERY			
-	CPP_COMPL			
-	CPP_COMMA			
-	CPP_OPEN_PAREN		
-	CPP_CLOSE_PAREN		
-	CPP_SEMICOLON		
-	CPP_OTHER			
+	CPP_DIV_EQ
+	CPP_DIV
+	CPP_LESS
+	CPP_LESS_EQ
+	CPP_SPACESHIP
+	CPP_LSHIFT_EQ
+	CPP_LSHIFT
+	CPP_OPEN_SQUARE
+	CPP_OPEN_BRACE
+	CPP_GREATER
+	CPP_GREATER_EQ
+	CPP_RSHIFT_EQ
+	CPP_RSHIFT
+	CPP_MOD
+	CPP_MOD_EQ
+	CPP_HASH
+	CPP_PASTE
+	CPP_CLOSE_BRACE
+	CPP_DOT
+	CPP_ELLIPSIS
+	CPP_DOT_STAR
+	CPP_PLUS
+	CPP_PLUS_PLUS
+	CPP_PLUS_EQ
+	CPP_MINUS
+	CPP_DEREF
+	CPP_DEREF_STAR
+	CPP_MINUS_MINUS
+	CPP_MINUS_EQ
+	CPP_AND
+	CPP_AND_AND
+	CPP_AND_EQ
+	CPP_OR
+	CPP_OR_OR
+	CPP_OR_EQ
+	CPP_COLON
+	CPP_SCOPE
+	CPP_CLOSE_SQUARE
+	CPP_MULT_EQ
+	CPP_MULT
+	CPP_EQ_EQ
+	CPP_EQ
+	CPP_NOT_EQ
+	CPP_NOT
+	CPP_XOR_EQ
+	CPP_XOR
+	CPP_QUERY
+	CPP_COMPL
+	CPP_COMMA
+	CPP_OPEN_PAREN
+	CPP_CLOSE_PAREN
+	CPP_SEMICOLON
+	CPP_OTHER
+
 
 class CPP_Flag(Enum):
 	"""
@@ -101,178 +101,177 @@ class CPP_Flag(Enum):
 	8 = 1000
 	and so on
 	"""
-	NONE 		= 1
-	DIGRAPH 	= 2
+	NONE = 1
+	DIGRAPH = 2
+
 
 class CPPOption(Enum):
-	NONE		= 0
+	NONE = 0
 	DIGRAPHS
 	C_PLUS_PLUS
-	SCOPE	
+	SCOPE
 
 # RID = Reserved ID
+
+
 class CPPReserved(Enum):
 	# Modifiers:
 	# C, in empirical order of frequency.
-	RID_STATIC 		= 0
-	RID_UNSIGNED 
-	RID_LONG 	
-	RID_CONST 	
-	RID_EXTERN 	
-	RID_REGISTER 
-	RID_TYPEDEF 
-	RID_SHORT 	
-	RID_INLINE 	
-	RID_VOLATILE 
-	RID_SIGNED 		
-	RID_AUTO 		
-	RID_RESTRICT 	
-	RID_NORETURN 	
-	RID_ATOMIC 		
-
-	# C extensions 
-	RID_COMPLEX	
-	RID_THREAD	
-	RID_SAT		
-
-	# C++
-	RID_FRIEND	
-	RID_VIRTUAL	
-	RID_EXPLICIT
-	RID_EXPORT	
-	RID_MUTABLE	
-
-	# ObjC ("PQ" reserved words - they do not appear after a '@' and are keywords only in specific contexts)
-	RID_IN		
-	RID_OUT		
-	RID_INOUT	
-	RID_BYCOPY	
-	RID_BYREF	
-	RID_ONEWAY	
-	
-	# ObjC ("PATTR" reserved words - they do not appear after a '@'  and are keywords only as property attributes)
-	RID_GETTER	
-	RID_SETTER	
-	RID_READONLY
-	RID_READWRITE
-	RID_ASSIGN	
-	RID_RETAIN	
-	RID_COPY	
-	RID_PROPATOMIC
-	RID_NONATOMIC
-	
-	# ObjC nullability support keywords that also can appear in the
-	# property attribute context.  These values should remain contiguous
-	# with the other property attributes. 
-	RID_NULL_UNSPECIFIED
-	RID_NULLABLE		
-	RID_NONNULL			
-	RID_NULL_RESETTABLE	
-	
-	# C (reserved and imaginary types not implemented, so any use is a syntax error)
-	RID_IMAGINARY		
-
-	# C
-	RID_INT		
-	RID_CHAR	
-	RID_FLOAT	
-	RID_DOUBLE	
-	RID_VOID	
-
-	RID_ENUM	
-	RID_STRUCT	
-	RID_UNION	
-	RID_IF		
-	RID_ELSE	
-
-	RID_WHILE	
-	RID_DO		
-	RID_FOR		
-	RID_SWITCH	
-	RID_CASE	
-
-	RID_DEFAULT	
-	RID_BREAK	
-	RID_CONTINUE
-	RID_RETURN	
-	RID_GOTO	
-
-	RID_SIZEOF	
-	
+	RID_STATIC = 0
+	RID_UNSIGNED
+	RID_LONG
+	RID_CONST
+	RID_EXTERN
+	RID_REGISTER
+	RID_TYPEDEF
+	RID_SHORT
+	RID_INLINE
+	RID_VOLATILE
+	RID_SIGNED
+	RID_AUTO
+	RID_RESTRICT
+	RID_NORETURN
+	RID_ATOMIC
 
 	# C extensions
-	RID_ASM			
-	RID_TYPEOF	 	
+	RID_COMPLEX
+	RID_THREAD
+	RID_SAT
+
+	# C++
+	RID_FRIEND
+	RID_VIRTUAL
+	RID_EXPLICIT
+	RID_EXPORT
+	RID_MUTABLE
+
+	# ObjC ("PQ" reserved words - they do not appear after a '@' and are keywords only in specific contexts)
+	RID_IN
+	RID_OUT
+	RID_INOUT
+	RID_BYCOPY
+	RID_BYREF
+	RID_ONEWAY
+
+	# ObjC ("PATTR" reserved words - they do not appear after a '@'  and are keywords only as property attributes)
+	RID_GETTER
+	RID_SETTER
+	RID_READONLY
+	RID_READWRITE
+	RID_ASSIGN
+	RID_RETAIN
+	RID_COPY
+	RID_PROPATOMIC
+	RID_NONATOMIC
+
+	# ObjC nullability support keywords that also can appear in the
+	# property attribute context.  These values should remain contiguous
+	# with the other property attributes.
+	RID_NULL_UNSPECIFIED
+	RID_NULLABLE
+	RID_NONNULL
+	RID_NULL_RESETTABLE
+
+	# C (reserved and imaginary types not implemented, so any use is a syntax error)
+	RID_IMAGINARY
+
+	# C
+	RID_INT
+	RID_CHAR
+	RID_FLOAT
+	RID_DOUBLE
+	RID_VOID
+
+	RID_ENUM
+	RID_STRUCT
+	RID_UNION
+	RID_IF
+	RID_ELSE
+
+	RID_WHILE
+	RID_DO
+	RID_FOR
+	RID_SWITCH
+	RID_CASE
+
+	RID_DEFAULT
+	RID_BREAK
+	RID_CONTINUE
+	RID_RETURN
+	RID_GOTO
+
+	RID_SIZEOF
+
+	# C extensions
+	RID_ASM
+	RID_TYPEOF
 	RID_TYPEOF_UNQUAL
-	RID_ALIGNOF		
-	RID_ATTRIBUTE	
-	
-	RID_VA_ARG		
-	
-	RID_EXTENSION	
-	RID_IMAGPART	
-	RID_REALPART	
-	RID_LABEL		
-	RID_CHOOSE_EXPR	
-	
+	RID_ALIGNOF
+	RID_ATTRIBUTE
+
+	RID_VA_ARG
+
+	RID_EXTENSION
+	RID_IMAGPART
+	RID_REALPART
+	RID_LABEL
+	RID_CHOOSE_EXPR
+
 	RID_TYPES_COMPATIBLE_P
-	RID_BUILTIN_COMPLEX	
-	RID_BUILTIN_SHUFFLE	
-	
+	RID_BUILTIN_COMPLEX
+	RID_BUILTIN_SHUFFLE
+
 	RID_BUILTIN_SHUFFLEVECTOR
 	RID_BUILTIN_CONVERTVECTOR
-	RID_BUILTIN_TGMATH		
-	
+	RID_BUILTIN_TGMATH
+
 	RID_BUILTIN_HAS_ATTRIBUTE
 	RID_BUILTIN_ASSOC_BARRIER
-	
-	RID_DFLOAT32			
-	RID_DFLOAT64			
-	RID_DFLOAT128			
-	
+
+	RID_DFLOAT32
+	RID_DFLOAT64
+	RID_DFLOAT128
 
 	# TS 18661-3 keywords, in the same sequence as the TI_* values.
-	RID_FLOAT16		
+	RID_FLOAT16
 	RID_FLOATN_NX_FIRST = RID_FLOAT16
-	RID_FLOAT32		
-	RID_FLOAT64		
-	RID_FLOAT128	
-	RID_FLOAT32X	
-	RID_FLOAT64X	
-	RID_FLOAT128X	
+	RID_FLOAT32
+	RID_FLOAT64
+	RID_FLOAT128
+	RID_FLOAT32X
+	RID_FLOAT64X
+	RID_FLOAT128X
 
-	RID_FRACT						
-	RID_ACCUM						
-	RID_AUTO_TYPE					
+	RID_FRACT
+	RID_ACCUM
+	RID_AUTO_TYPE
 	RID_BUILTIN_CALL_WITH_STATIC_CHAIN
-	
 
 	# "__GIMPLE", for the GIMPLE-parsing extension to the C frontend.
 	RID_GIMPLE
 
 	# "__PHI", for parsing PHI function in GIMPLE FE.
-	RID_PHI	
+	RID_PHI
 
 	# "__RTL", for the RTL-parsing extension to the C frontend.
-	RID_RTL	
+	RID_RTL
 
 	# C11
-	RID_ALIGNAS	
-	RID_GENERIC	
+	RID_ALIGNAS
+	RID_GENERIC
 
 	# This means to warn that this is a C++ keyword, and then treat it as a normal identifier.
-	RID_CXX_COMPAT_WARN	
+	RID_CXX_COMPAT_WARN
 
 	# GNU transactional memory extension
-	RID_TRANSACTION_ATOMIC	
-	RID_TRANSACTION_RELAXED	
-	RID_TRANSACTION_CANCEL	
-	
+	RID_TRANSACTION_ATOMIC
+	RID_TRANSACTION_RELAXED
+	RID_TRANSACTION_CANCEL
+
 	# Too many ways of getting the name of a function as a string
-	RID_FUNCTION_NAME			
-	RID_PRETTY_FUNCTION_NAME	
-	RID_C99_FUNCTION_NAME		
-	
+	RID_FUNCTION_NAME
+	RID_PRETTY_FUNCTION_NAME
+	RID_C99_FUNCTION_NAME
 
 	# C++ (some of these are keywords in Objective-C as well, but only if they appear after a '@')
 	RID_BOOL
