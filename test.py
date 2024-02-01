@@ -292,7 +292,7 @@ class LexTestCase(unittest.TestCase):
         test_cases = [
             [#0
                 [   # test case
-                    'int main ()', 
+                    'int main(){}', 
                     lex.CPPOption.NONE
                 ],
                 [   # test result

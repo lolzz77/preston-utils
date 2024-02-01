@@ -880,11 +880,12 @@ def group_lex(string, cpp_option):
 
 	arr_arr = lex_string(string, cpp_option)
 
+	# Group CPP_NAME
 	for i, arr in enumerate(arr_arr):
 		if arr['type'] == CPPType.CPP_WHITESPACE:
 			group_lex.append(
 				{
-					'word': temp_string[:i],
+					'word': temp_string,
 					'type': arr_type
 				}
 			)
@@ -893,14 +894,66 @@ def group_lex(string, cpp_option):
 			wait_for_breaker = False
 			continue
 
+		if arr['type'] == CPPType.CPP_OPEN_PAREN:
+			group_lex.append(
+				{
+					'word': temp_string,
+					'type': arr_type
+				}
+			)
+			arr_type = -1
+			temp_string = ''
+			wait_for_breaker = False
+			arr_arr = arr_arr[i:]
+			break
+
 		temp_string += arr['char']
 
-		if wait_for_breaker = True:
+		if wait_for_breaker == True:
 			continue
 
-		if arr['type'] == CPPType.CPP_NAME:
+		if 	arr['type'] == CPPType.CPP_NAME:
 			if arr_type == -1:
 				arr_type = arr['type']
+			wait_for_breaker = True
+			continue
+	
+	# Group PARANTHESIS
+	for i, arr in enumerate(arr_arr):
+		temp_string += arr['char']
+
+		if arr['type'] == CPPType.CPP_CLOSE_PAREN:
+			group_lex.append(
+				{
+					'word': temp_string,
+					'type': arr_type
+				}
+			)
+			arr_type = -1
+			temp_string = ''
+			wait_for_breaker = False
+			continue
+
+		if arr['type'] == CPPType.CPP_OPEN_BRACE:
+			group_lex.append(
+				{
+					'word': temp_string,
+					'type': arr_type
+				}
+			)
+			arr_type = -1
+			temp_string = ''
+			wait_for_breaker = False
+			arr_arr = arr_arr[i:]
+			break
+
+
+		if wait_for_breaker == True:
+			continue
+
+		if 	arr['type'] == CPPType.CPP_OPEN_PAREN:
+			if arr_type == -1:
+				arr_type = CPPType.CPP_PARENTHESIS
 			wait_for_breaker = True
 			continue
 
