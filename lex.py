@@ -918,11 +918,12 @@ def group_lex(string, cpp_option):
 			wait_for_breaker = True
 			continue
 	
-	# Group PARANTHESIS
+	# Group PARANTHESIS & BRACKET SCOPE
 	for i, arr in enumerate(arr_arr):
 		temp_string += arr['char']
 
-		if arr['type'] == CPPType.CPP_CLOSE_PAREN:
+		if arr['type'] == CPPType.CPP_CLOSE_PAREN or \
+			arr['type'] == CPPType.CPP_CLOSE_BRACE:
 			group_lex.append(
 				{
 					'word': temp_string,
@@ -934,30 +935,35 @@ def group_lex(string, cpp_option):
 			wait_for_breaker = False
 			continue
 
-		if arr['type'] == CPPType.CPP_OPEN_BRACE:
-			group_lex.append(
-				{
-					'word': temp_string,
-					'type': arr_type
-				}
-			)
-			arr_type = -1
-			temp_string = ''
-			wait_for_breaker = False
-			arr_arr = arr_arr[i:]
-			break
+		# if arr['type'] == CPPType.CPP_OPEN_BRACE:
+		# 	group_lex.append(
+		# 		{
+		# 			'word': temp_string,
+		# 			'type': arr_type
+		# 		}
+		# 	)
+		# 	arr_type = -1
+		# 	temp_string = ''
+		# 	wait_for_breaker = False
+		# 	arr_arr = arr_arr[i:]
+		# 	break
 
 
 		if wait_for_breaker == True:
 			continue
 
-		if 	arr['type'] == CPPType.CPP_OPEN_PAREN:
-			if arr_type == -1:
+		if arr['type'] == CPPType.CPP_OPEN_PAREN or \
+			arr['type'] == CPPType.CPP_OPEN_BRACE:
+			if arr_type != -1:
+				continue
+			if arr['type'] == CPPType.CPP_OPEN_PAREN:
 				arr_type = CPPType.CPP_PARENTHESIS
+			elif arr['type'] == CPPType.CPP_OPEN_BRACE:
+				arr_type = CPPType.CPP_SCOPE
 			wait_for_breaker = True
 			continue
 
-
+	print('hello')
 
 def decide():
 	"""
