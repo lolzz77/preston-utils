@@ -877,91 +877,92 @@ def group_lex(string, cpp_option):
 	temp_string = ''
 	wait_for_breaker = False
 	arr_type = -1
+	to_group_cpp_name = False
+	to_group_parenthesis = False
+	to_group_bracket = False
 
 	arr_arr = lex_string(string, cpp_option)
 
-	# Group CPP_NAME
-	for i, arr in enumerate(arr_arr):
-		if arr['type'] == CPPType.CPP_WHITESPACE:
-			group_lex.append(
-				{
-					'word': temp_string,
-					'type': arr_type
-				}
-			)
-			arr_type = -1
-			temp_string = ''
-			wait_for_breaker = False
-			continue
+	for arr in arr_arr:
+		if arr['type'] == CPPType.CPP_NAME:
+			to_group_cpp_name = True
+		elif arr['type'] == CPPType.CPP_OPEN_PAREN:
+			to_group_parenthesis = True
+		elif arr['type'] == CPPType.CPP_OPEN_BRACE:
+			to_group_bracket = True
 
-		if arr['type'] == CPPType.CPP_OPEN_PAREN:
-			group_lex.append(
-				{
-					'word': temp_string,
-					'type': arr_type
-				}
-			)
-			arr_type = -1
-			temp_string = ''
-			wait_for_breaker = False
-			arr_arr = arr_arr[i:]
-			break
-
-		temp_string += arr['char']
-
-		if wait_for_breaker == True:
-			continue
-
-		if 	arr['type'] == CPPType.CPP_NAME:
-			if arr_type == -1:
-				arr_type = arr['type']
-			wait_for_breaker = True
-			continue
-	
-	# Group PARANTHESIS & BRACKET SCOPE
-	for i, arr in enumerate(arr_arr):
-		temp_string += arr['char']
-
-		if arr['type'] == CPPType.CPP_CLOSE_PAREN or \
-			arr['type'] == CPPType.CPP_CLOSE_BRACE:
-			group_lex.append(
-				{
-					'word': temp_string,
-					'type': arr_type
-				}
-			)
-			arr_type = -1
-			temp_string = ''
-			wait_for_breaker = False
-			continue
-
-		# if arr['type'] == CPPType.CPP_OPEN_BRACE:
-		# 	group_lex.append(
-		# 		{
-		# 			'word': temp_string,
-		# 			'type': arr_type
-		# 		}
-		# 	)
-		# 	arr_type = -1
-		# 	temp_string = ''
-		# 	wait_for_breaker = False
-		# 	arr_arr = arr_arr[i:]
-		# 	break
-
-
-		if wait_for_breaker == True:
-			continue
-
-		if arr['type'] == CPPType.CPP_OPEN_PAREN or \
-			arr['type'] == CPPType.CPP_OPEN_BRACE:
-			if arr_type != -1:
+		if to_group_cpp_name:
+			# Group CPP_NAME
+			if arr['type'] == CPPType.CPP_WHITESPACE:
+				group_lex.append(
+					{
+						'word': temp_string,
+						'type': arr_type
+					}
+				)
+				arr_type = -1
+				temp_string = ''
+				wait_for_breaker = False
+				to_group_cpp_name = False
 				continue
+
 			if arr['type'] == CPPType.CPP_OPEN_PAREN:
-				arr_type = CPPType.CPP_PARENTHESIS
-			elif arr['type'] == CPPType.CPP_OPEN_BRACE:
-				arr_type = CPPType.CPP_SCOPE
-			wait_for_breaker = True
-			continue
+				group_lex.append(
+					{
+						'word': temp_string,
+						'type': arr_type
+					}
+				)
+				arr_type = -1
+				temp_string = ''
+				wait_for_breaker = False
+				to_group_cpp_name = False
+				pass
+			
+			if to_group_cpp_name:
+				temp_string += arr['char']
+
+				if wait_for_breaker == True:
+					continue
+
+				if 	arr['type'] == CPPType.CPP_NAME:
+					if arr_type == -1:
+						arr_type = arr['type']
+					wait_for_breaker = True
+					continue
+		
+		if to_group_parenthesis or to_group_bracket:
+			# Group PARANTHESIS & BRACKET SCOPE
+			temp_string += arr['char']
+
+			if arr['type'] == CPPType.CPP_CLOSE_PAREN or \
+				arr['type'] == CPPType.CPP_CLOSE_BRACE:
+				group_lex.append(
+					{
+						'word': temp_string,
+						'type': arr_type
+					}
+				)
+				arr_type = -1
+				temp_string = ''
+				wait_for_breaker = False
+				to_group_bracket = False
+				to_group_parenthesis = False
+				continue
+
+			if wait_for_breaker == True:
+				continue
+
+			if arr['type'] == CPPType.CPP_OPEN_PAREN or \
+				arr['type'] == CPPType.CPP_OPEN_BRACE:
+				if arr_type != -1:
+					continue
+				if arr['type'] == CPPType.CPP_OPEN_PAREN:
+					arr_type = CPPType.CPP_PARENTHESIS
+				elif arr['type'] == CPPType.CPP_OPEN_BRACE:
+					arr_type = CPPType.CPP_SCOPE
+				wait_for_breaker = True
+				continue
 
 	print('hello')
 
