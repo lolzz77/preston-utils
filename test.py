@@ -316,6 +316,11 @@ class LexTestCase(unittest.TestCase):
                         "flag" : lex.CPP_Flag.NONE,
                         "type" : lex.CPPType.CPP_PARENTHESIS
                     },
+                    {
+                        "word" : '{}',
+                        "flag" : lex.CPP_Flag.NONE,
+                        "type" : lex.CPPType.CPP_BRACE
+                    },
                 ]
             ],
         ]

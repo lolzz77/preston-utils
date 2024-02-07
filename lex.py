@@ -93,6 +93,7 @@ class CPPType(enum.Enum):
 
 	# Below here is i self add one
 	CPP_PARENTHESIS = enum.auto()
+	CPP_BRACE = enum.auto()
 
 
 class CPP_Flag(enum.Enum):
@@ -960,7 +961,7 @@ def group_lex(string, cpp_option):
 				if arr['type'] == CPPType.CPP_OPEN_PAREN:
 					arr_type = CPPType.CPP_PARENTHESIS
 				elif arr['type'] == CPPType.CPP_OPEN_BRACE:
-					arr_type = CPPType.CPP_SCOPE
+					arr_type = CPPType.CPP_BRACE
 				wait_for_breaker = True
 				continue
 
