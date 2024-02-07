@@ -388,7 +388,7 @@ class CPPReserved(enum.Enum):
 	RID_AT_INTERFACE = enum.auto()
 
 	RID_AT_IMPLEMENTATION = enum.auto()
-	
+
 
 	# OpenMP
 	RID_OMP_ALL_MEMORY = enum.auto()
@@ -734,7 +734,7 @@ def lex(c, string, cpp_option):
 			if next_char == ':':
 				result['flags'] |= CPP_Flag.DIGRAPH
 				result['type'] = CPPType.CPP_HASH
-				# This means double hash, 
+				# This means double hash,
 				# `%:` = #, `%:%:` = ##
 				# Double hash = CPP_PASTE
 				if next_next_char == '%' and next_next_next_char == ':':
@@ -892,8 +892,10 @@ def group_lex(string, cpp_option):
 		elif arr['type'] == CPPType.CPP_OPEN_BRACE:
 			to_group_bracket = True
 
-		if to_group_cpp_name:
-			# Group CPP_NAME
+		# Group CPP_NAME
+		if 	to_group_cpp_name and\
+			to_group_parenthesis == False and\
+			to_group_bracket == False:
 			if arr['type'] == CPPType.CPP_WHITESPACE:
 				group_lex.append(
 					{
@@ -919,7 +921,7 @@ def group_lex(string, cpp_option):
 				wait_for_breaker = False
 				to_group_cpp_name = False
 				pass
-			
+
 			if to_group_cpp_name:
 				temp_string += arr['char']
 
@@ -927,14 +929,18 @@ def group_lex(string, cpp_option):
 					continue
 
 				if 	arr['type'] == CPPType.CPP_NAME:
-					if arr_type == -1:
+					if arr_type == -1: # to protect this variable being overwritten everytime
 						arr_type = arr['type']
 					wait_for_breaker = True
 					continue
-		
-		if to_group_parenthesis or to_group_bracket:
-			# Group PARANTHESIS & BRACKET SCOPE
+
+		# Group PARANTHESIS & BRACKET SCOPE
+		if 	to_group_parenthesis or\
+			to_group_bracket:
 			temp_string += arr['char']
+
+			if arr['type'] == CPPType.CPP_WHITESPACE:
+				continue
 
 			if arr['type'] == CPPType.CPP_CLOSE_PAREN or \
 				arr['type'] == CPPType.CPP_CLOSE_BRACE:
@@ -947,6 +953,7 @@ def group_lex(string, cpp_option):
 				arr_type = -1
 				temp_string = ''
 				wait_for_breaker = False
+				to_group_cpp_name = False
 				to_group_bracket = False
 				to_group_parenthesis = False
 				continue
@@ -956,7 +963,7 @@ def group_lex(string, cpp_option):
 
 			if arr['type'] == CPPType.CPP_OPEN_PAREN or \
 				arr['type'] == CPPType.CPP_OPEN_BRACE:
-				if arr_type != -1:
+				if arr_type != -1: # to protect this variable being overwritten everytime
 					continue
 				if arr['type'] == CPPType.CPP_OPEN_PAREN:
 					arr_type = CPPType.CPP_PARENTHESIS
@@ -965,7 +972,9 @@ def group_lex(string, cpp_option):
 				wait_for_breaker = True
 				continue
 
-	print('hello')
+	for lex in group_lex:
+		print(lex)
+	print()
 
 def decide():
 	"""
