@@ -909,19 +909,6 @@ def group_lex(string, cpp_option):
 				to_group_cpp_name = False
 				continue
 
-			if arr['type'] == CPPType.CPP_OPEN_PAREN:
-				group_lex.append(
-					{
-						'word': temp_string,
-						'type': arr_type
-					}
-				)
-				arr_type = -1
-				temp_string = ''
-				wait_for_breaker = False
-				to_group_cpp_name = False
-				pass
-
 			if to_group_cpp_name:
 				temp_string += arr['char']
 
@@ -933,6 +920,21 @@ def group_lex(string, cpp_option):
 						arr_type = arr['type']
 					wait_for_breaker = True
 					continue
+
+		# for `main()` case, that is, what comes after CPP_NAME is not whitespace.
+		if arr['type'] == CPPType.CPP_OPEN_PAREN and\
+			to_group_cpp_name:
+			group_lex.append(
+				{
+					'word': temp_string,
+					'type': arr_type
+				}
+			)
+			arr_type = -1
+			temp_string = ''
+			wait_for_breaker = False
+			to_group_cpp_name = False
+			pass
 
 		# Group PARANTHESIS & BRACKET SCOPE
 		if 	to_group_parenthesis or\
