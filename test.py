@@ -355,6 +355,14 @@ class LexTestCase(unittest.TestCase):
                 [
                 ]
             ],
+            [#5
+                [
+                    '__cold int * main ( ) { int x; int y; while(x) {printf("Hello world!")} }', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                ]
+            ],
         ]
 
         for i, test_case in enumerate(test_cases):

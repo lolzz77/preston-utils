@@ -881,6 +881,8 @@ def group_lex(string, cpp_option):
 	to_group_cpp_name = False
 	to_group_parenthesis = False
 	to_group_bracket = False
+	open_paren_count = 0
+	open_bracket_count = 0
 
 	arr_arr = lex_string(string, cpp_option)
 
@@ -891,6 +893,21 @@ def group_lex(string, cpp_option):
 			to_group_parenthesis = True
 		elif arr['type'] == CPPType.CPP_OPEN_BRACE:
 			to_group_bracket = True
+
+
+		# To count nested parenthesis & brackets
+		if arr['type'] == CPPType.CPP_OPEN_PAREN:
+			to_group_parenthesis = True
+			open_paren_count += 1
+		elif arr['type'] == CPPType.CPP_OPEN_BRACE:
+			to_group_bracket = True
+			open_bracket_count += 1
+		elif arr['type'] == CPPType.CPP_CLOSE_PAREN:
+			open_paren_count -= 1
+		elif arr['type'] == CPPType.CPP_CLOSE_BRACE:
+			open_bracket_count -= 1
+
+
 
 		# Group CPP_NAME
 		if 	to_group_cpp_name and\
@@ -921,8 +938,12 @@ def group_lex(string, cpp_option):
 					wait_for_breaker = True
 					continue
 
+
+
 		# for `main()` case, that is, what comes after CPP_NAME is not whitespace.
 		if arr['type'] == CPPType.CPP_OPEN_PAREN and\
+			open_paren_count == 1 and\
+			open_bracket_count == 0 and\
 			to_group_cpp_name:
 			group_lex.append(
 				{
@@ -936,6 +957,8 @@ def group_lex(string, cpp_option):
 			to_group_cpp_name = False
 			pass
 
+
+
 		# Group PARANTHESIS & BRACKET SCOPE
 		if 	to_group_parenthesis or\
 			to_group_bracket:
@@ -946,19 +969,22 @@ def group_lex(string, cpp_option):
 
 			if arr['type'] == CPPType.CPP_CLOSE_PAREN or \
 				arr['type'] == CPPType.CPP_CLOSE_BRACE:
-				group_lex.append(
-					{
-						'word': temp_string,
-						'type': arr_type
-					}
-				)
-				arr_type = -1
-				temp_string = ''
-				wait_for_breaker = False
-				to_group_cpp_name = False
-				to_group_bracket = False
-				to_group_parenthesis = False
-				continue
+
+				if open_bracket_count == 0 and\
+					open_paren_count == 0:
+					group_lex.append(
+						{
+							'word': temp_string,
+							'type': arr_type
+						}
+					)
+					arr_type = -1
+					temp_string = ''
+					wait_for_breaker = False
+					to_group_cpp_name = False
+					to_group_bracket = False
+					to_group_parenthesis = False
+					continue
 
 			if wait_for_breaker == True:
 				continue
@@ -974,6 +1000,8 @@ def group_lex(string, cpp_option):
 				wait_for_breaker = True
 				continue
 		
+
+
 		# below here is to handle for 'other', those that not handled above. this probably are the symbols like * ^ & etc
 		temp_string += arr['char']
 
