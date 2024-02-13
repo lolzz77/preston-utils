@@ -973,6 +973,34 @@ def group_lex(string, cpp_option):
 					arr_type = CPPType.CPP_BRACE
 				wait_for_breaker = True
 				continue
+		
+		# below here is to handle for 'other', those that not handled above. this probably are the symbols like * ^ & etc
+		temp_string += arr['char']
+
+		# I dont want append whtiespaces
+		if temp_string == ' ':
+			temp_string = '' # reset it
+			continue
+
+		if 	to_group_cpp_name == False and\
+			to_group_parenthesis == False and\
+			to_group_bracket == False:
+			arr_type = arr['type']
+			group_lex.append(
+				{
+					'word': temp_string,
+					'type': arr_type
+				}
+			)
+			arr_type = -1
+			temp_string = ''
+			wait_for_breaker = False
+			to_group_cpp_name = False
+			to_group_bracket = False
+			to_group_parenthesis = False
+
+
+	# return group_lex
 
 	for lex in group_lex:
 		print(lex)

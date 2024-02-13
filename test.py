@@ -347,6 +347,14 @@ class LexTestCase(unittest.TestCase):
                 [
                 ]
             ],
+            [#4
+                [
+                    'int * main() {}', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                ]
+            ],
         ]
 
         for i, test_case in enumerate(test_cases):
