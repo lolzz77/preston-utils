@@ -355,9 +355,73 @@ class LexTestCase(unittest.TestCase):
                 [
                 ]
             ],
-            [#5
+            [#5 i think is okay that it treats int& as CPP_NAME, dont think split it helps me.
+                [
+                    'int* main() {}', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                ]
+            ],
+            [#6
+                [
+                    'int & main() {}', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                ]
+            ],
+            [#7 i think is okay that it treats int& as CPP_NAME, dont think split it helps me.
+                [
+                    'int& main() {}', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                ]
+            ],
+            [#8
                 [
                     '__cold int * main ( ) { int x; int y; while(x) {printf("Hello world!")} }', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                ]
+            ],
+            [#9
+                [
+                    '__cold int * main ( int x[], int y(), int z{5, 6, 7} ) { int x; int y; while(x) {printf("Hello world!")} }', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                ]
+            ],
+            [#10
+                [
+                    '__cold (int) (*) main ( ) { }', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                ]
+            ],
+            [#11
+                [
+                    '__cold (int) (&) main ( ) { }', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                ]
+            ],
+            [#12 i think is okay that it treats (int&) as PARENTHESIS, cos how u wanna split? It's inside parenthesis
+                [
+                    '__cold (int*) main ( ) { }', 
+                    lex.CPPOption.NONE
+                ],
+                [
+                ]
+            ],
+            [#13 i think is okay that it treats (int&) as PARENTHESIS, cos how u wanna split? It's inside parenthesis
+                [
+                    '__cold (int&) main ( ) { }', 
                     lex.CPPOption.NONE
                 ],
                 [
