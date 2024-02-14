@@ -480,12 +480,12 @@ class LexTestCase(unittest.TestCase):
                         'flag': lex.CPP_Flag.NONE,
                     },
                     {
-                        'word':'main',
+                        'word':'_Decimal64',
                         'type': lex.CPPType.CPP_NAME,
                         'flag': lex.CPP_Flag.NONE,
                     },
                     {
-                        'word':'_Decimal64',
+                        'word':'main',
                         'type': lex.CPPType.CPP_NAME,
                         'flag': lex.CPP_Flag.NONE,
                     },
