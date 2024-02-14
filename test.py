@@ -429,9 +429,85 @@ class LexTestCase(unittest.TestCase):
             ],
         ]
 
+        # for i, test_case in enumerate(test_cases):
+            # print(i)
+            # test_result = lex.group_lex(test_case[0][0], test_case[0][1])
+            # with self.subTest(i=i):
+                # self.assertEqual(
+                #     test_result, 
+                #     test_case[1]
+                # )
+
+
+    def test_detect_keyword(self):
+        test_cases = [
+            [#0
+                [   # test case
+                    {
+                        'word':'int',
+                        'type': lex.CPPType.CPP_NAME,
+                        'flag': lex.CPP_Flag.NONE,
+                    },
+                    {
+                        'word':'main',
+                        'type': lex.CPPType.CPP_NAME,
+                        'flag': lex.CPP_Flag.NONE,
+                    },
+                    {
+                        'word':'()',
+                        'type': lex.CPPType.CPP_PARENTHESIS,
+                        'flag': lex.CPP_Flag.NONE,
+                    },
+                    {
+                        'word':'{}',
+                        'type': lex.CPPType.CPP_BRACE,
+                        'flag': lex.CPP_Flag.NONE,
+                    },
+                ],
+                [   # test result
+                ]
+            ],
+            [#2
+                [
+                    {
+                        'word':'int',
+                        'type': lex.CPPType.CPP_NAME,
+                        'flag': lex.CPP_Flag.NONE,
+                    },
+                    {
+                        'word':'*',
+                        'type': lex.CPPType.CPP_MULT,
+                        'flag': lex.CPP_Flag.NONE,
+                    },
+                    {
+                        'word':'main',
+                        'type': lex.CPPType.CPP_NAME,
+                        'flag': lex.CPP_Flag.NONE,
+                    },
+                    {
+                        'word':'_Decimal64',
+                        'type': lex.CPPType.CPP_NAME,
+                        'flag': lex.CPP_Flag.NONE,
+                    },
+                    {
+                        'word':'( int x, int y )',
+                        'type': lex.CPPType.CPP_PARENTHESIS,
+                        'flag': lex.CPP_Flag.NONE,
+                    },
+                    {
+                        'word':'{ x = 5; while(x) {printf("Hello"\r\n)} }',
+                        'type': lex.CPPType.CPP_BRACE,
+                        'flag': lex.CPP_Flag.NONE,
+                    },
+                ],
+                [
+                ]
+            ]
+        ]
+
         for i, test_case in enumerate(test_cases):
             print(i)
-            test_result = lex.group_lex(test_case[0][0], test_case[0][1])
+            test_result = lex.detect_keyword(test_case[0])
             # with self.subTest(i=i):
                 # self.assertEqual(
                 #     test_result, 
