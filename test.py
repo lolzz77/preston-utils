@@ -430,6 +430,7 @@ class LexTestCase(unittest.TestCase):
         ]
 
         for i, test_case in enumerate(test_cases):
+            print(i)
             test_result = lex.group_lex(test_case[0][0], test_case[0][1])
             # with self.subTest(i=i):
                 # self.assertEqual(

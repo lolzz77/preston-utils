@@ -627,6 +627,8 @@ def lex(c, string, cpp_option):
 		- this full string is needed cos some CPPType need to check next char to decide
 		- so far, only need 2 next char, so, maybe u can pass in maximum of length 3 of 's' parameter
 	cpp_option - the compiling option (eg: compile trigraph? compile as CPP? etc)
+
+	return - an associative array
 	"""
 
 	# This is for if u lex-ed more than 1 character, for example, '!='
@@ -635,8 +637,8 @@ def lex(c, string, cpp_option):
 
 	result = {}
 	result['char'] = c
-	result['flag'] = CPP_Flag.NONE
 	result['type'] = CPPType.CPP_NONE
+	result['flag'] = CPP_Flag.NONE
 	next_char = ''
 	next_next_char = ''
 	next_next_next_char = ''
@@ -917,7 +919,8 @@ def group_lex(string, cpp_option):
 				group_lex.append(
 					{
 						'word': temp_string,
-						'type': arr_type
+						'type': arr_type,
+						'flag': arr['flag']
 					}
 				)
 				arr_type = -1
@@ -948,7 +951,8 @@ def group_lex(string, cpp_option):
 			group_lex.append(
 				{
 					'word': temp_string,
-					'type': arr_type
+					'type': arr_type,
+					'flag': arr['flag']
 				}
 			)
 			arr_type = -1
@@ -975,7 +979,8 @@ def group_lex(string, cpp_option):
 					group_lex.append(
 						{
 							'word': temp_string,
-							'type': arr_type
+							'type': arr_type,
+							'flag': arr['flag']
 						}
 					)
 					arr_type = -1
@@ -1017,7 +1022,8 @@ def group_lex(string, cpp_option):
 			group_lex.append(
 				{
 					'word': temp_string,
-					'type': arr_type
+					'type': arr_type,
+					'flag': arr['flag']
 				}
 			)
 			arr_type = -1
@@ -1028,10 +1034,64 @@ def group_lex(string, cpp_option):
 			to_group_parenthesis = False
 
 
+	# After for loop is done, need to handle those unecessary parenthesis like (return type),
+	# It will be saved as "CPP_PARENTHESIS", so, i treat it as unecessary.
+	# I will remove it and assign an appropriate CPP type.
+	is_brace = False
+	is_parenthesis = False
+	temp_arr = {}
+	temp_group_lex = group_lex.copy()
+
+	# loop backwards
+	# list() is required to reverse the enumerate() as well
+	for i, arr in reversed(list(enumerate(group_lex))):
+		if arr['type'] == CPPType.CPP_BRACE and\
+			is_brace==False:
+			is_brace = True
+			continue
+		if arr['type'] == CPPType.CPP_PARENTHESIS and\
+			is_parenthesis==False:
+			is_parenthesis = True
+			continue
+
+		if is_brace==False:
+			break
+		
+		if is_brace and is_parenthesis:
+			if arr['type'] == CPPType.CPP_PARENTHESIS:
+				# Trip the parenthesis
+				arr['word'] = arr['word'][1:-1]
+				temp_arr = lex(arr['word'][0], arr['word'], cpp_option)
+				arr['type'] = temp_arr['type']
+
+				# in case there's '*' & '&' symbol after the name, separate them
+				# ensure len of arr['word'] is not 1, because sometimes the word is just '*' or '&' single letter
+				if arr['word'][-1] in ['*', '&'] and\
+					len(arr['word']) != 1:
+					temp_string = arr['word'][-1]
+					temp_arr = lex(temp_string, temp_string, cpp_option)
+					# strip off the letter
+					arr['word'] = arr['word'][:-1]
+					# insert in middle of array
+					temp_group_lex.insert(i+1, temp_arr)
+					pass
+				
+
+				# reset variables
+				temp_arr = {}
+
+				# Should not reset these 2
+				# They are flag for indicating this group_lex is a function definition
+				# is_brace = False
+				# is_parenthesis = False
+
+	group_lex = temp_group_lex.copy()
+	temp_group_lex = {}
+
 	# return group_lex
 
-	for lex in group_lex:
-		print(lex)
+	for each_group in group_lex:
+		print(each_group)
 	print()
 
 def decide():
