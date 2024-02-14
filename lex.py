@@ -1123,7 +1123,14 @@ def decide():
 	syntaxes = function definition
 
 	eg2: #include <stdio.h>
-	stntaxes = include
+	syntaxes = include
+
+	Next, some characters need to peek the next one/two chracters in order to know their true form
+	eg: /, syntax: just a forward slash
+	but //, syntax: single line comment
+
+	+1 char = need peek 1 char forward
+	+2 chars = need peek 2 chars forward
 
 	+1 char
 	CPP_MULTILINE_COMMENT
