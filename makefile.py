@@ -31,7 +31,7 @@ try:
     # Open the main makefile that you're going to put your build command into
     with open(makefile_path, "r") as file:
         lines = file.readlines()
-        for line in lines:
+        for index, line in enumerate(lines):
             temp_makefile_content += line
 
             # search for all variables
@@ -70,7 +70,10 @@ try:
                     the_value = ''
                     for line in makefile_database_lines:
                         found = False
-                        if line.startswith(string_to_search_for):
+                        # because i added to print line number, like this `123:abc`
+                        # now, i want to strip `123`
+                        stripped_line = line.split(":")[1]
+                        if stripped_line.startswith(string_to_search_for):
                             found = True
                             # get the value
                             # eg: the line is like this
@@ -96,7 +99,7 @@ try:
                     output, error = process.communicate()
                     # this is to remove '\n' at the end
                     output_stripped = output.decode("utf-8")[:-1]
-                    output_to_write = output_stripped + '\n'
+                    output_to_write = str(index+1) + ':' + output_stripped + '\n'
 
                     # this is for the matching later, i dont want to write into database if
                     # PATH=abc already existed in the database
