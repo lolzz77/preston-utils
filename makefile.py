@@ -101,7 +101,8 @@ try:
                     # Then, there are cases where `MAKE=\n ERROR`
                     # whereby the error message is printed after the '\n'
                     output_stripped = output_stripped.split('\n', 1)[0]
-                    output_to_write = makefile_path + ':' + str(index+1) + ':' + output_stripped + '\n'
+                    line_number = str(index+1)
+                    output_to_write = makefile_path + ':' + line_number + ':' + output_stripped + '\n'
                     # this is for the matching later, i dont want to write into database if
                     # PATH=abc already existed in the database
                     # But if PATH=def, that is, same varaible name, but different value, then write into database
@@ -141,14 +142,15 @@ try:
                     string_to_search_for = match_string + '='
                 
                     for line_3 in makefile_database_lines:
-                        stripped_line = line_3.split(":")[1]
+                        stripped_line = line_3.split(":")[2]
                         if stripped_line.startswith(string_to_search_for):
                             the_value = line_3[line_3.index(string_to_search_for) + len(string_to_search_for):].strip()
                             temp_line = line.replace(match, the_value)
+                            break
 
                 # no need + '\n', the `line` already included it
                 # if you put, above code will error out of index when doing stripping
-                output_to_write = makefile_path + ':' + str(index + 1) + ':' + line
+                output_to_write = makefile_path + ':' + str(index + 1) + ':' + temp_line
                 makefile_database_file.close()
                 makefile_database_file = open(makefile_database_path, "a")
                 makefile_database_file.write(output_to_write)
