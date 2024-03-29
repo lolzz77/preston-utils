@@ -52,38 +52,73 @@ try:
                     # How you gonna handle that?
                     string_to_search_for = match_string + '='
                     
+                    # because i changed to open the file always to truncate it
+                    # then when do readlines() will fail with exception
+                    # the solution is to close and open with `r` option again, `a` those does not work
+                    makefile_database_file.close()
+                    makefile_database_file = open(makefile_database_path, "r")
+                    
                     makefile_database_lines = makefile_database_file.readlines()
+
+                    # after reading lines, close the file and reopen again with append mode
+                    # for writing operation later
+                    makefile_database_file.close()
+                    makefile_database_file = open(makefile_database_path, "a")
                     
                     # Search weather this variable existed in database
                     found = False
+                    the_value = ''
                     for line in makefile_database_lines:
                         found = False
                         if line.startswith(string_to_search_for):
                             found = True
+                            # get the value
+                            # eg: the line is like this
+                            # ROOTPATH=/user/home
+                            # the valeu will be `/user/home`
+                            the_value = line[line.index(string_to_search_for) + len(string_to_search_for):].strip()
                             break
+                    
+                    # Regardless if database contains the variable, evaluates the value
+                    # Because what if the variable has changed value?
+                    with open(temp_makefile_path, "w") as file:
+                        temp_temp_makefile_content = temp_makefile_content
+                        temp_temp_makefile_content += f"$(info {match_string}={match})\n"
+                        # the content only be written after the file descriptor is closed, well, unless you call file.flush()
+                        file.write(temp_temp_makefile_content)
+
+                    # Call a process to execute `make` command, copy my current environment to it
+                    process = subprocess.Popen(['make', '-f', temp_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
+                    # Example output
+                    # Output : b'<the value of {match}\n'
+                    # error : make: *** no targets. Stop.\n'
+                    # the `b` infront, is not count in the character, it basically means it is displaying in binrary format i guess
+                    output, error = process.communicate()
+                    # this is to remove '\n' at the end
+                    output_stripped = output.decode("utf-8")[:-1]
+                    output_to_write = output_stripped + '\n'
+
+                    # this is for the matching later, i dont want to write into database if
+                    # PATH=abc already existed in the database
+                    # But if PATH=def, that is, same varaible name, but different value, then write into database
+                    output_to_match_for_the_value = output_stripped
+                    output_to_match_for_the_value = output_to_match_for_the_value[len(string_to_search_for):]
 
                     if found:
-                        pass
+                        # If database contains the variable, check whether the value is the same
+                        # if diff value, WRITE IT TO DATABASE
+                        if the_value != output_to_match_for_the_value and \
+                            output:
+                            makefile_database_file.write(output_to_write)
+                            makefile_database_file.flush()
+
                     else:
-                        # else, write the content to temporary makefile
-                        # then, execute `make` to run the makefile to print out / evaluates the variable value
-                        with open(temp_makefile_path, "w") as file:
-                            temp_temp_makefile_content = temp_makefile_content
-                            temp_temp_makefile_content += f"$(info {match_string}={match})\n"
-                            # the content only be written after the file descriptor is closed, well, unless you call file.flush()
-                            file.write(temp_temp_makefile_content)
+                        # else, write into database
+                        # only write when `output` has something
+                        if output:
+                            makefile_database_file.write(output_to_write)
+                            makefile_database_file.flush()
                         
-                        # Call a process to execute `make` command, copy my current environment to it
-                        process = subprocess.Popen(['make', '-f', temp_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
-                        # Example output
-                        # Output : b'<the value of {match}\n'
-                        # error : make: *** no targets. Stop.\n'
-                        # the `b` infront, is not count in the character, it basically means it is displaying in binrary format i guess
-                        output, error = process.communicate()
-                        output_to_write = output.decode("utf-8")[:-1] + '\n'
-                        makefile_database_file.write(output_to_write)
-                        makefile_database_file.flush()
-                            
             # search for included makefile
             # if line.startswith('include'):
             #     print(line)
