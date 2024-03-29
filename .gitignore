@@ -53,3 +53,6 @@ myNote
 
 # vscode setting files
 .vscode
+
+# python script for makefile
+makefile_python_output/

@@ -89,5 +89,14 @@
             "name": "Python - Unit Test",
             "program": "${workspaceFolder}/test.py",
         },
+        {
+            "type": "python",
+            "request": "launch",
+            "name": "Python - Makefile",
+            "program": "/data/c-script-append-log-in-all-files-and-functions/makefile.py",
+            "args": [
+                "/data/myrepo/trbo/gemstones/gemstones/Makefile"
+            ]
+        },
     ]
 }
