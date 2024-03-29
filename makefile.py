@@ -122,14 +122,26 @@ try:
                         
             # search for included makefile
             if line.startswith('include'):
+                # no need + '\n', the `line` already included it
+                # if you put, above code will error out of index when doing stripping
                 output_to_write = str(index + 1) + ':' + line
                 makefile_database_file.write(output_to_write)
                 makefile_database_file.flush()
-                # process = subprocess.Popen(['make', '-f', temp_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
-                # output, error = process.communicate()
-                # # this is to remove '\n' at the end
-                # output_stripped = output.decode("utf-8")[:-1]
-                # output_to_write = str(index+1) + ':' + output_stripped + '\n'
+
+                # line = include ../path/to/directory\n
+                # strip `include`, leading whitespace, and the '\n'
+                # no need check whether the path contains name.mk or not, it still works for command `make -f /dir/`
+                append_path = line.strip('include').strip().rstrip('\n')
+                # get the path of the current opened makefile
+                # strip `makefile` from the string, append the path of the `line` into it
+                current_makefile = makefile_path
+                if current_makefile.endswith("Makefile"):
+                    current_makefile = current_makefile[:-8]
+                new_makefile_path = current_makefile + append_path
+                process = subprocess.Popen(['make', '-f', new_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
+                output, error = process.communicate()
+                print(output)
+                print(error)
 except FileNotFoundError:
     print("File not found.")
 except IOError:
