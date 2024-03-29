@@ -45,15 +45,17 @@ try:
                     match_string = match_string.replace('${', '').replace('}', '')
                     match_string = match_string.replace('$(', '').replace(')', '')
                     
-                    # what's read from makefile_database_file.readlines(), contains '\n'
-                    string_to_search_for = match_string + '=' + '\n'
+                    # TODO : in some cases, there's 
+                    # if[$(OS)==WINDOW] PATH=a, else PATH=b
+                    # How you gonna handle that?
+                    string_to_search_for = match_string + '='
                     
                     makefile_database_lines = makefile_database_file.readlines()
                     
                     found = False
                     for line in makefile_database_lines:
                         found = False
-                        if string_to_search_for == line:
+                        if line.startswith(string_to_search_for):
                             found = True
                             break
 
