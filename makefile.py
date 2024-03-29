@@ -71,7 +71,7 @@ try:
                         found = False
                         # because i added to print line number, like this `123:abc`
                         # now, i want to strip `123`
-                        stripped_line = line_2.split(":")[1]
+                        stripped_line = line_2.split(":")[2]
                         if stripped_line.startswith(string_to_search_for):
                             found = True
                             # get the value
@@ -101,7 +101,7 @@ try:
                     # Then, there are cases where `MAKE=\n ERROR`
                     # whereby the error message is printed after the '\n'
                     output_stripped = output_stripped.split('\n', 1)[0]
-                    output_to_write = str(index+1) + ':' + output_stripped + '\n'
+                    output_to_write = makefile_path + ':' + str(index+1) + ':' + output_stripped + '\n'
                     # this is for the matching later, i dont want to write into database if
                     # PATH=abc already existed in the database
                     # But if PATH=def, that is, same varaible name, but different value, then write into database
@@ -148,7 +148,7 @@ try:
 
                 # no need + '\n', the `line` already included it
                 # if you put, above code will error out of index when doing stripping
-                output_to_write = str(index + 1) + ':' + line
+                output_to_write = makefile_path + ':' + str(index + 1) + ':' + line
                 makefile_database_file.close()
                 makefile_database_file = open(makefile_database_path, "a")
                 makefile_database_file.write(output_to_write)
