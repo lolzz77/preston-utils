@@ -4,8 +4,9 @@ import subprocess
 import os
 import shutil
 import subprocess
+import re
 
-if len(sys.argv) != 2:
+if len(sys.argv) < 2:
     print("Invalid number of arguments. Usage: python makefile.py <makefile_path>")
     sys.exit(1)
 
@@ -97,8 +98,10 @@ try:
                     output, error = process.communicate()
                     # this is to remove '\n' at the end
                     output_stripped = output.decode("utf-8")[:-1]
+                    # Then, there are cases where `MAKE=\n ERROR`
+                    # whereby the error message is printed after the '\n'
+                    output_stripped = output_stripped.split('\n', 1)[0]
                     output_to_write = str(index+1) + ':' + output_stripped + '\n'
-
                     # this is for the matching later, i dont want to write into database if
                     # PATH=abc already existed in the database
                     # But if PATH=def, that is, same varaible name, but different value, then write into database
@@ -122,12 +125,15 @@ try:
                         
             # search for included makefile
             if line.startswith('include'):
+                # first, we have to find whether there's variable in the path
+                # eg: include ../$(WORKSPACE)/path/to/Makefile
                 temp_line = line
                 makefile_database_file.close()
                 makefile_database_file = open(makefile_database_path, "r")
                 makefile_database_lines = makefile_database_file.readlines()
                 matches = re.findall(variable_regex, line)
 
+                # If there is, replace the variable with the value found in the database
                 for match in matches:
                     match_string = match
                     match_string = match_string.replace('${', '').replace('}', '')
