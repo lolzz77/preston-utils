@@ -101,6 +101,8 @@ try:
                     # Then, there are cases where `MAKE=\n ERROR`
                     # whereby the error message is printed after the '\n'
                     output_stripped = output_stripped.split('\n', 1)[0]
+                    # remove trailing whitespace, else, later compare `==` will treat it differently
+                    output_stripped = output_stripped.strip()
                     line_number = str(index+1)
                     output_to_write = makefile_path + ':' + line_number + ':' + output_stripped + '\n'
                     # this is for the matching later, i dont want to write into database if
