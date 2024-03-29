@@ -122,22 +122,49 @@ try:
                         
             # search for included makefile
             if line.startswith('include'):
+                temp_line = line
+                makefile_database_file.close()
+                makefile_database_file = open(makefile_database_path, "r")
+                makefile_database_lines = makefile_database_file.readlines()
+                matches = re.findall(variable_regex, line)
+
+                for match in matches:
+                    match_string = match
+                    match_string = match_string.replace('${', '').replace('}', '')
+                    match_string = match_string.replace('$(', '').replace(')', '')
+                    string_to_search_for = match_string + '='
+                
+                    for line_3 in makefile_database_lines:
+                        stripped_line = line_3.split(":")[1]
+                        if stripped_line.startswith(string_to_search_for):
+                            the_value = line_3[line_3.index(string_to_search_for) + len(string_to_search_for):].strip()
+                            temp_line = line.replace(match, the_value)
+
                 # no need + '\n', the `line` already included it
                 # if you put, above code will error out of index when doing stripping
                 output_to_write = str(index + 1) + ':' + line
+                makefile_database_file.close()
+                makefile_database_file = open(makefile_database_path, "a")
                 makefile_database_file.write(output_to_write)
                 makefile_database_file.flush()
 
                 # line = include ../path/to/directory\n
                 # strip `include`, leading whitespace, and the '\n'
                 # no need check whether the path contains name.mk or not, it still works for command `make -f /dir/`
-                append_path = line.strip('include').strip().rstrip('\n')
+                append_path = temp_line.strip('include').strip().rstrip('\n')
                 # get the path of the current opened makefile
                 # strip `makefile` from the string, append the path of the `line` into it
                 current_makefile = makefile_path
                 if current_makefile.endswith("Makefile"):
                     current_makefile = current_makefile[:-8]
-                new_makefile_path = current_makefile + append_path
+
+                # sometimes, append_path = ../path/to/Makefile
+                # sometimes, append_path = /data/path/to/Makefile
+                # if is full path, dont append
+                if append_path.startswith('..'):
+                    new_makefile_path = current_makefile + append_path
+                else:
+                    new_makefile_path = append_path
                 process = subprocess.Popen(['make', '-f', new_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
                 output, error = process.communicate()
                 print(output)
