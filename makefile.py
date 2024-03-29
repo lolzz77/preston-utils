@@ -47,9 +47,6 @@ try:
                     match_string = match_string.replace('${', '').replace('}', '')
                     match_string = match_string.replace('$(', '').replace(')', '')
                     
-                    # TODO : in some cases, there's 
-                    # if[$(OS)==WINDOW] PATH=a, else PATH=b
-                    # How you gonna handle that?
                     string_to_search_for = match_string + '='
                     
                     # because i changed to open the file always to truncate it
