@@ -65,27 +65,28 @@ try:
                     # Search weather this variable existed in database
                     found = False
                     the_value = ''
-                    for line in makefile_database_lines:
+                    # reason why i put line_2, cos, it will disturb the original `line` that i had above LOL
+                    for line_2 in makefile_database_lines:
                         found = False
                         # because i added to print line number, like this `123:abc`
                         # now, i want to strip `123`
-                        stripped_line = line.split(":")[1]
+                        stripped_line = line_2.split(":")[1]
                         if stripped_line.startswith(string_to_search_for):
                             found = True
                             # get the value
                             # eg: the line is like this
                             # ROOTPATH=/user/home
                             # the valeu will be `/user/home`
-                            the_value = line[line.index(string_to_search_for) + len(string_to_search_for):].strip()
+                            the_value = line_2[line_2.index(string_to_search_for) + len(string_to_search_for):].strip()
                             break
                     
                     # Regardless if database contains the variable, evaluates the value
                     # Because what if the variable has changed value?
-                    with open(temp_makefile_path, "w") as file:
+                    with open(temp_makefile_path, "w") as file_2:
                         temp_temp_makefile_content = temp_makefile_content
                         temp_temp_makefile_content += f"$(info {match_string}={match})\n"
                         # the content only be written after the file descriptor is closed, well, unless you call file.flush()
-                        file.write(temp_temp_makefile_content)
+                        file_2.write(temp_temp_makefile_content)
 
                     # Call a process to execute `make` command, copy my current environment to it
                     process = subprocess.Popen(['make', '-f', temp_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
@@ -120,8 +121,15 @@ try:
                             makefile_database_file.flush()
                         
             # search for included makefile
-            # if line.startswith('include'):
-            #     print(line)
+            if line.startswith('include'):
+                output_to_write = str(index + 1) + ':' + line
+                makefile_database_file.write(output_to_write)
+                makefile_database_file.flush()
+                # process = subprocess.Popen(['make', '-f', temp_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
+                # output, error = process.communicate()
+                # # this is to remove '\n' at the end
+                # output_stripped = output.decode("utf-8")[:-1]
+                # output_to_write = str(index+1) + ':' + output_stripped + '\n'
 except FileNotFoundError:
     print("File not found.")
 except IOError:
