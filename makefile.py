@@ -25,7 +25,7 @@ temp_makefile_content = ""
 # Matches ${...}, $(...)
 variable_regex = r'\$[\(\{][a-zA-Z0-9_-]+[\)\}]'
 
-makefile_database_file = open(makefile_database_path, "a+")
+makefile_database_file = open(makefile_database_path, "w")
 
 try:
     # Open the main makefile that you're going to put your build command into
@@ -41,6 +41,8 @@ try:
                     # Search weather this variable is existed in the databse
                     makefile_database_file.seek(0)
 
+                    # Just wanna make it to write `$(info VAR=$(VAR))`
+                    # So when run make, it will print `VAR=value`
                     match_string = match
                     match_string = match_string.replace('${', '').replace('}', '')
                     match_string = match_string.replace('$(', '').replace(')', '')
@@ -52,6 +54,7 @@ try:
                     
                     makefile_database_lines = makefile_database_file.readlines()
                     
+                    # Search weather this variable existed in database
                     found = False
                     for line in makefile_database_lines:
                         found = False
