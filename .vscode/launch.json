@@ -96,7 +96,8 @@
             "program": "/data/c-script-append-log-in-all-files-and-functions/makefile.py",
             // "cwd" : "/data/myrepo/trbo/gemstones/gemstones/",
             "args": [
-                "/data/myrepo/trbo/gemstones/gemstones/Makefile"
+                "/data/myrepo/trbo/gemstones/gemstones/Makefile",
+                "make"
             ]
         },
     ]
