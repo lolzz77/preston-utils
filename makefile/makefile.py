@@ -29,6 +29,7 @@ import re
 import subprocess
 import os
 import shutil
+import test
 
 if len(sys.argv) < 3:
     print("Invalid number of argument.")
@@ -75,33 +76,6 @@ with open(makefile_path, "r") as file:
     # endif
     # so, it's a nested ifeq, i have to know which evaluaetes to true
     guard_nest_level = 0
-    endif_regex = r"^\s*endif\s*"  # detect `endif` word, optional leading & trailing whitespace
-    # detect target recipe, tested in python regex online
-    # Explanation:
-    # Must not start with (?!keywords), and comment
-    # Must not begin with whitespace
-    # Match anything in the bracket, one or more
-    # Optional whitespace
-    # Must ':'
-    # Cannot contain `=` after that
-    # List of test:
-    # ABC : DEF
-    #  ABC : DEF
-    # ABC :
-    # $(DSP): TAR
-    # ${GG}:
-    # abc-def:
-    # ABC $(ABC):
-    # ABC $(ABC) :
-    # $(ABC)/$(DEF)_$(GHI)_EFF:
-    # export ABC:=123
-    # ABC :=
-    # ABC : =   (For this one, 
-    #           it will match, and maekfile will not fail for typing like this, but dont worry,
-    #           if you type like this, the variable is not assigned, despite makefile still can run
-    # ABC =:
-    # #command: abc
-    target_recipe_regex = r"^(?!#|export|ifeq|ifneq|else|endif)[^\s][a-zA-Z0-9$(){}\s*/_-]+\s*:[^=]"
     temp_line = ''
     temp_temp_line = ''
     temp_temp_temp_line = ''
@@ -211,7 +185,7 @@ with open(makefile_path, "r") as file:
             for line_5 in temp_temp_temp_makefile_content:
                 index_3 += 1
                 output_list_0 = output_list[0]
-                match_2 = re.match(endif_regex, output_list_0)
+                match_2 = re.match(test.endif_regex, output_list_0)
                 # `endif` found, what comes after the list probably random makefile error, ends here
                 if match_2:
                     # before end, repalce the all the element starting from current index to newline
@@ -258,7 +232,7 @@ with open(makefile_path, "r") as file:
             temp_temp_temp_makefile_content.append(line_4)
             guard_nest_level += 1
         else:
-            if re.match(target_recipe_regex, line_4):
+            if re.match(test.target_recipe_regex, line_4):
                 temp_temp_temp_temp_line = '#TOREMOVE ' + line_4
                 temp_makefile_content.append(temp_temp_temp_temp_line)
                 is_target_recipe = True
@@ -298,7 +272,6 @@ with open(makefile_path, "r") as file:
     temp_temp_temp_makefile_content = []
     temp_temp_temp_temp_makefile_content = []
     guard_nest_level = 0
-    endif_regex = r"^\s*endif\s*"
     temp_line = ''
     temp_temp_line = ''
     temp_temp_temp_line = ''
@@ -325,9 +298,8 @@ with open(makefile_preprocessed_path, "w") as file_4:
 
 
 # This one do the makefile dictionary
-with open(makefile_path, "r") as file:
-    # Matches ${...}, $(...)
-    variable_regex = r'\$[\(\{][a-zA-Z0-9_-]+[\)\}]'
+with open(makefile_preprocessed_path, "r") as file:
+
     lines = []
     temp_makefile_content = []
     matches = None
@@ -361,8 +333,8 @@ with open(makefile_path, "r") as file:
         temp_makefile_content.append(line)
 
         # search for all variables
-        if re.search(variable_regex, line):
-            matches = re.findall(variable_regex, line)
+        if re.search(test.variable_regex, line):
+            matches = re.findall(test.variable_regex, line)
             for match in matches:
                 output_to_write = []
 
@@ -454,10 +426,12 @@ with open(makefile_path, "r") as file:
             # first, we have to find whether there's variable in the path
             # eg: include ../$(WORKSPACE)/path/to/Makefile
             temp_line = line
-            makefile_database_file.close()
+
+            if makefile_database_file:
+                makefile_database_file.close()
             makefile_database_file = open(makefile_database_path, "r")
             makefile_database_lines = makefile_database_file.readlines()
-            matches = re.findall(variable_regex, line)
+            matches = re.findall(test.variable_regex, line)
             output_to_write = []
 
             # If there is, replace the variable with the value found in the database
