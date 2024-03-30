@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import re
+import re
 
 if len(sys.argv) < 3:
     print("Invalid number of argument.")
@@ -51,7 +52,21 @@ with open(makefile_path, "r") as file:
     guard_nest_level = 0
     for line_4 in lines:
         separator += 1
-        temp_line = line_4.lstrip()
+        temp_line = line_4.lstrip()  # trim leading whitespace
+        temp_temp_temp_line = line_4[:-1]  # remove newline at the end
+        # Given $(ABC)=1,
+        # Replace $(ABC) to $$(ABC), so that when you run the makefile code,
+        # It will output `$(ABC)` instead of `1`
+        temp_temp_temp_line = temp_temp_temp_line.replace("$(", "$$(")
+        temp_temp_temp_line = temp_temp_temp_line.replace("${", "$${")
+        # Reason i put `""`,
+        # Given `     $(ABC)`
+        # When you run makefile code,
+        # It will output the whitespace as well
+        # But in the output, it will output `""`, so you gotta remove it later
+        temp_temp_line = f'$(info "{temp_temp_temp_line}")\n'
+        if line_4.isspace(): # if the line is just whitespace & newline, just make it into newline
+            temp_temp_line = '\n'
 
         if has_guarding:
 
@@ -61,7 +76,6 @@ with open(makefile_path, "r") as file:
 
                 temp_temp_makefile_content.append(line_4)
                 nest_level += 1
-                temp_temp_makefile_content.append(f"$(info PREPROCESS {nest_level})\n")
                 temp_temp_temp_makefile_content.append(line_4)
                 separator_list.append(separator)
                 continue
@@ -73,7 +87,6 @@ with open(makefile_path, "r") as file:
             
             if temp_line.startswith('endif') and\
                 guard_nest_level == 0:
-                temp_temp_makefile_content.append(line_4)
                 temp_temp_temp_makefile_content.append(line_4)
                 has_guarding = False
                 prepare_for_war = True
@@ -81,11 +94,15 @@ with open(makefile_path, "r") as file:
             elif temp_line.startswith('else'):
                 nest_level += 1
                 temp_temp_makefile_content.append(line_4)
-                temp_temp_makefile_content.append(f"$(info PREPROCESS {nest_level})\n")
                 separator_list.append(separator)
                 temp_temp_temp_makefile_content.append(line_4)
                 continue
             else:
+                # if is `endif` line, dont append
+                if temp_line.startswith("endif"):
+                    pass
+                else:
+                    temp_temp_makefile_content.append(temp_temp_line)
                 temp_temp_temp_makefile_content.append(line_4)
                 continue
         
@@ -94,6 +111,10 @@ with open(makefile_path, "r") as file:
         # get returned output from that file
         # decides which part of code to be included
         if prepare_for_war:
+            # append `$(info "endif")` at the end
+            # because there might be some random makefile error after running the makefile
+            # using this endif to tell me not to include any outputs that outputs after this `endif` output
+            temp_temp_makefile_content.append(temp_temp_line)
             temp_temp_temp_temp_maekfile_content = []
             temp_temp_temp_temp_maekfile_content = temp_makefile_content.copy()
             temp_temp_temp_temp_maekfile_content.extend(temp_temp_makefile_content)
@@ -105,53 +126,36 @@ with open(makefile_path, "r") as file:
 
             process = subprocess.Popen(['make', '-f', makefile_preprocessed_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
             output, error = process.communicate()
-
-            # strip "PREPROCESSED " (with whitepace) & newline at the end
-            output_stripped = output.decode("utf-8")[len("PREPROCESS "):-1]
-            nest_level_finalized = int(output_stripped)
+            output_decoded = output.decode("utf-8")
+            output_list = [item[1:-1] + '\n' for item in output_decoded.split('\n')]
+            output_stripped = []
             
-            # this is a bit complex, so hear me out
-            # separator_list will hold index start of `ifeq`, `ifneq`, `else`, `endif`
-            # eg:
-            # the temp_temp_temp_makefile list = ['ifeq ($(OS_TYPE_VER),LK4)\n', '\tVALUE A\n', 'else\n', '\tVALUE B\n', 'endif\n']
-            # separator = [0, 2 ,4]
-            # if `else` is evaluated to TRUE,
-            # nest_level_finalized = 2
-            # if nest_level_finalized = 2, means i need start and end index from index 1 to 2 in the list
-            # [0, 2, 4]
-            #    1  2
-            # what's between 2 is index 1 and index 2
-            # index 1 value is 2
-            # index 2 value is 4
-            # Thus, i need remove index 0 from the list
-            # so that i can do separator_list[0] and separator_list[1] to get the start and end value i need
-            # then, using star tand end value, which is 2 and 4
-            # i can strip the temp_temp_temp_makefile starting from index 2 to index 4
-            # End result, i will get temp_temp_temp_makefile list = ['\tVALUE B\n']
-            # Update: i changed to instead of popping the list, replace the content of string to newline
-            for _ in range(nest_level_finalized-1):
-                separator_list.pop(0)
+            temp_temp_temp_temp_makefile_content = temp_temp_temp_makefile_content.copy()
+            index_3 = -1
+            for line_5 in temp_temp_temp_makefile_content:
+                index_3 += 1
+                output_list_0 = output_list[0]
+                endif_regex = r"^\s*endif\s*" # Detech `endif` word, optional leading & trailing whitespace
+                match_2 = re.match(endif_regex, output_list_0)
+                # `endif` found, what comes after the list probably random makefile error, ends here
+                # before end, replace the last element in the list to newline (usually last element in the list will be `endif`)
+                if match_2:
+                    temp_temp_temp_temp_makefile_content[index_3] = '\n'
+                    break
+                
+                if line_5 == output_list[0]:
+                    output_list.pop(0)
+                else:
+                    temp_temp_temp_temp_makefile_content[index_3] = '\n'
 
-            start = separator_list[0] + 1
-            end = separator_list[1]
-            separator_list = []
-            separator = 0
-            nest_level = 0
-            nest_level_finalized = 0
-
-            for index_2, line_5 in enumerate(temp_temp_temp_makefile_content):
-                if index_2 >= start and index_2 < end:
-                    continue
-                temp_temp_temp_makefile_content[index_2] = '\n'
-            temp_makefile_content.extend(temp_temp_temp_makefile_content)
-            temp_temp_temp_makefile_content = []
+            temp_makefile_content.extend(temp_temp_temp_temp_makefile_content)
+            temp_temp_temp_temp_makefile_content = []
             continue
         
         if temp_line.startswith('ifeq') or temp_line.startswith('ifneq'):
             has_guarding = True
             temp_temp_makefile_content.append(line_4)
             nest_level += 1
-            temp_temp_makefile_content.append(f"$(info PREPROCESS {nest_level})\n")
             temp_temp_temp_makefile_content.append(line_4)
             guard_nest_level += 1
             separator = 0
