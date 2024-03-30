@@ -138,9 +138,9 @@ with open(makefile_path, "r") as file:
                 endif_regex = r"^\s*endif\s*" # Detech `endif` word, optional leading & trailing whitespace
                 match_2 = re.match(endif_regex, output_list_0)
                 # `endif` found, what comes after the list probably random makefile error, ends here
-                # before end, replace the last element in the list to newline (usually last element in the list will be `endif`)
                 if match_2:
-                    temp_temp_temp_temp_makefile_content[index_3] = '\n'
+                    # before end, repalce the all the element starting from current index to newline
+                    temp_temp_temp_temp_makefile_content[index_3:] = ['\n'] * (len(temp_temp_temp_temp_makefile_content) - index_3)
                     break
                 
                 if line_5 == output_list[0]:
@@ -150,6 +150,7 @@ with open(makefile_path, "r") as file:
 
             temp_makefile_content.extend(temp_temp_temp_temp_makefile_content)
             temp_temp_temp_temp_makefile_content = []
+            temp_temp_temp_makefile_content = []
             continue
         
         if temp_line.startswith('ifeq') or temp_line.startswith('ifneq'):
