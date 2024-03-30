@@ -1,22 +1,39 @@
+# Usage : python3 [path to this script] [path to the Makefile you want] ["the command you pass into the Makefile, with double quote"]
+
+# Cautions:
+# Prefer not to pass in `-j=` argument (Means run multiple processes at once)
+# Cos I didnt test what will be end up lol
+
+# Note:
+# you put your preprocessed makefile into /dir/Makefile_Preprocessed.mk
+# In that makefile, it has a line `include ../Makefile_2`
+# It is using relative path `../`
+# Even tho you put in `/dir`
+# This `../` will take place at your current directory your terminal is running
+# That is, putting your Makefile_Preprocessed.mk in any dir, it wont affact the outcome.
+# As long as your terminal is at the right directory, you're fine
+
 import sys
 import re
 import subprocess
 import os
 import shutil
-import subprocess
-import re
-import re
 
 if len(sys.argv) < 3:
     print("Invalid number of argument.")
     sys.exit(1)
 
-makefile_path = sys.argv[1]
-maekfile_command = sys.argv[2] # the passed in command for this makefile
-current_path = os.getcwd()
+makefile_path = sys.argv[1] # the makefile path
+passed_in_command = sys.argv[2]  # the passed in command for this makefile
 
+
+makefile_command = passed_in_command.split()
+makefile_command = [word.strip() for word in makefile_command]
+
+current_path = os.getcwd()
 makefile_python_output_path = current_path + '/makefile_python_output'
 
+# Create my output folder if not exists
 if not os.path.exists(makefile_python_output_path):
     os.makedirs(makefile_python_output_path)
 
@@ -24,34 +41,48 @@ makefile_database_path = makefile_python_output_path + '/makefile_database.txt'
 makefile_preprocessed_path = makefile_python_output_path + '/makefile_preprocessed.mk'
 temp_makefile_path = makefile_python_output_path + '/temp_makefile.mk'
 
-temp_makefile_content = []
-
-# Matches ${...}, $(...)
-variable_regex = r'\$[\(\{][a-zA-Z0-9_-]+[\)\}]'
-
+# always create & truncate the file
 makefile_database_file = open(makefile_database_path, "w")
+makefile_database_file.close()
 
 
 # Pre-processing, settle all the guardings
 with open(makefile_path, "r") as file:
-    lines = file.readlines()
     has_guarding = False
     prepare_for_war = False
+    lines_2 = []
+    temp_makefile_content = []
     temp_temp_makefile_content = []
     # this is for appending to the official write buffer
     temp_temp_temp_makefile_content = []
-    separator = 0
-    separator_list = []
+    temp_temp_temp_temp_makefile_content = []
     # this is for cases like
     # ifeq...
     # else ifeq...
     # endif
     # so, it's a nested ifeq, i have to know which evaluaetes to true
-    nest_level = 0
-    nest_level_finalized = 0
     guard_nest_level = 0
-    for line_4 in lines:
-        separator += 1
+    endif_regex = r"^\s*endif\s*"  # Detech `endif` word, optional leading & trailing whitespace
+    temp_line = ''
+    temp_temp_temp_line = ''
+    temp_temp_line = ''
+    command = []
+    process = None
+    output = None
+    error = None
+    error_decoded = ''
+    error_list = []
+    output_decoded = ''
+    output_list = []
+    output_stripped = []
+    index_3 = 0
+    output_list_0 = ''
+    match_2 = None
+
+
+    lines_2 = file.readlines()
+    for line_4 in lines_2:
+
         temp_line = line_4.lstrip()  # trim leading whitespace
         temp_temp_temp_line = line_4[:-1]  # remove newline at the end
         # Given $(ABC)=1,
@@ -65,6 +96,7 @@ with open(makefile_path, "r") as file:
         # It will output the whitespace as well
         # But in the output, it will output `""`, so you gotta remove it later
         temp_temp_line = f'$(info "{temp_temp_temp_line}")\n'
+
         if line_4.isspace(): # if the line is just whitespace & newline, just make it into newline
             temp_temp_line = '\n'
 
@@ -75,11 +107,8 @@ with open(makefile_path, "r") as file:
                 guard_nest_level += 1
 
                 temp_temp_makefile_content.append(line_4)
-                nest_level += 1
                 temp_temp_temp_makefile_content.append(line_4)
-                separator_list.append(separator)
                 continue
-
 
             if temp_line.startswith('endif'):
                 temp_temp_makefile_content.append(line_4)
@@ -90,11 +119,8 @@ with open(makefile_path, "r") as file:
                 temp_temp_temp_makefile_content.append(line_4)
                 has_guarding = False
                 prepare_for_war = True
-                separator_list.append(separator)
             elif temp_line.startswith('else'):
-                nest_level += 1
                 temp_temp_makefile_content.append(line_4)
-                separator_list.append(separator)
                 temp_temp_temp_makefile_content.append(line_4)
                 continue
             else:
@@ -103,6 +129,7 @@ with open(makefile_path, "r") as file:
                     pass
                 else:
                     temp_temp_makefile_content.append(temp_temp_line)
+
                 temp_temp_temp_makefile_content.append(line_4)
                 continue
         
@@ -111,6 +138,7 @@ with open(makefile_path, "r") as file:
         # get returned output from that file
         # decides which part of code to be included
         if prepare_for_war:
+
             # append `$(info "endif")` at the end
             # because there might be some random makefile error after running the makefile
             # using this endif to tell me not to include any outputs that outputs after this `endif` output
@@ -119,13 +147,22 @@ with open(makefile_path, "r") as file:
             temp_temp_temp_temp_maekfile_content = temp_makefile_content.copy()
             temp_temp_temp_temp_maekfile_content.extend(temp_temp_makefile_content)
             temp_temp_makefile_content = []
+
             with open(makefile_preprocessed_path, "w") as file_3:
                 file_3.write(''.join(temp_temp_temp_temp_maekfile_content))
                 file_3.flush()
             prepare_for_war = False
 
-            process = subprocess.Popen(['make', '-f', makefile_preprocessed_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
+            # You have to pass in argument by list
+            # eg: 'make' '-f' '/path/to/Makefile' 'target_recipe' 'var=1'
+            command = ['make', '-f', makefile_preprocessed_path]
+            command.extend(makefile_command)
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
             output, error = process.communicate()
+            # The error here mainly for debugging purposes only
+            # so that i can hover over it to see the value
+            error_decoded = error.decode("utf-8")
+            error_list = [item[1:-1] + '\n' for item in error_decoded.split('\n')]
             output_decoded = output.decode("utf-8")
             output_list = [item[1:-1] + '\n' for item in output_decoded.split('\n')]
             output_stripped = []
@@ -135,7 +172,6 @@ with open(makefile_path, "r") as file:
             for line_5 in temp_temp_temp_makefile_content:
                 index_3 += 1
                 output_list_0 = output_list[0]
-                endif_regex = r"^\s*endif\s*" # Detech `endif` word, optional leading & trailing whitespace
                 match_2 = re.match(endif_regex, output_list_0)
                 # `endif` found, what comes after the list probably random makefile error, ends here
                 if match_2:
@@ -156,21 +192,58 @@ with open(makefile_path, "r") as file:
         if temp_line.startswith('ifeq') or temp_line.startswith('ifneq'):
             has_guarding = True
             temp_temp_makefile_content.append(line_4)
-            nest_level += 1
             temp_temp_temp_makefile_content.append(line_4)
             guard_nest_level += 1
-            separator = 0
-            separator_list.append(separator)
         else:
             temp_makefile_content.append(line_4)
 
-with open(makefile_preprocessed_path, "w") as file_3:
-    file_3.write(''.join(temp_makefile_content))
-    file_3.flush()
+    # Reset variable
+    has_guarding = False
+    prepare_for_war = False
+    lines_2 = []
+    temp_makefile_content = []
+    temp_temp_makefile_content = []
+    temp_temp_temp_makefile_content = []
+    temp_temp_temp_temp_makefile_content = []
+    guard_nest_level = 0
+    endif_regex = r"^\s*endif\s*"
+    temp_line = ''
+    temp_temp_temp_line = ''
+    temp_temp_line = ''
+    command = []
+    process = None
+    output = None
+    error = None
+    error_decoded = ''
+    error_list = []
+    output_decoded = ''
+    output_list = []
+    output_stripped = []
+    index_3 = 0
+    output_list_0 = ''
+    match_2 = None
+
+with open(makefile_preprocessed_path, "w") as file_4:
+    file_4.write(''.join(temp_makefile_content))
+    file_4.flush()
+    
 sys.exit()
+
+
+
+
+
+
 # Open the main makefile that you're going to put your build command into
 with open(makefile_path, "r") as file:
+    # Matches ${...}, $(...)
+    variable_regex = r'\$[\(\{][a-zA-Z0-9_-]+[\)\}]'
+    lines = []
+    temp_makefile_content = []
+
+
     lines = file.readlines()
+
     for index, line in enumerate(lines):
         temp_makefile_content.append(line)
 
