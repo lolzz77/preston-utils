@@ -23,7 +23,7 @@ makefile_database_path = makefile_python_output_path + '/makefile_database.txt'
 makefile_preprocessed_path = makefile_python_output_path + '/makefile_preprocessed.mk'
 temp_makefile_path = makefile_python_output_path + '/temp_makefile.mk'
 
-temp_makefile_content = ""
+temp_makefile_content = []
 
 # Matches ${...}, $(...)
 variable_regex = r'\$[\(\{][a-zA-Z0-9_-]+[\)\}]'
@@ -36,7 +36,7 @@ with open(makefile_path, "r") as file:
     lines = file.readlines()
     has_guarding = False
     prepare_for_war = False
-    temp_temp_makefile_content = ''
+    temp_temp_makefile_content = []
     # this is for appending to the official write buffer
     temp_temp_temp_makefile_content = []
     separator = 0
@@ -58,20 +58,30 @@ with open(makefile_path, "r") as file:
             if temp_line.startswith('ifeq') or \
                 temp_line.startswith('ifneq'):
                 guard_nest_level += 1
+
+                temp_temp_makefile_content.append(line_4)
+                nest_level += 1
+                temp_temp_makefile_content.append(f"$(info PREPROCESS {nest_level})\n")
+                temp_temp_temp_makefile_content.append(line_4)
+                separator_list.append(separator)
+                continue
+
+
             if temp_line.startswith('endif'):
+                temp_temp_makefile_content.append(line_4)
                 guard_nest_level -= 1
             
             if temp_line.startswith('endif') and\
                 guard_nest_level == 0:
-                temp_temp_makefile_content += line_4
+                temp_temp_makefile_content.append(line_4)
                 temp_temp_temp_makefile_content.append(line_4)
                 has_guarding = False
                 prepare_for_war = True
                 separator_list.append(separator)
             elif temp_line.startswith('else'):
                 nest_level += 1
-                temp_temp_makefile_content += line_4
-                temp_temp_makefile_content += f"$(info PREPROCESS {nest_level})\n"
+                temp_temp_makefile_content.append(line_4)
+                temp_temp_makefile_content.append(f"$(info PREPROCESS {nest_level})\n")
                 separator_list.append(separator)
                 temp_temp_temp_makefile_content.append(line_4)
                 continue
@@ -79,12 +89,17 @@ with open(makefile_path, "r") as file:
                 temp_temp_temp_makefile_content.append(line_4)
                 continue
         
+        # write to a preprocessed file
+        # then execute `make` on that file
+        # get returned output from that file
+        # decides which part of code to be included
         if prepare_for_war:
-            temp_temp_temp_temp_maekfile_content = temp_makefile_content
-            temp_temp_temp_temp_maekfile_content += temp_temp_makefile_content
-            temp_temp_makefile_content = ''
+            temp_temp_temp_temp_maekfile_content = []
+            temp_temp_temp_temp_maekfile_content = temp_makefile_content.copy()
+            temp_temp_temp_temp_maekfile_content.extend(temp_temp_makefile_content)
+            temp_temp_makefile_content = []
             with open(makefile_preprocessed_path, "w") as file_3:
-                file_3.write(temp_temp_temp_temp_maekfile_content)
+                file_3.write(''.join(temp_temp_temp_temp_maekfile_content))
                 file_3.flush()
             prepare_for_war = False
 
@@ -128,31 +143,31 @@ with open(makefile_path, "r") as file:
                 if index_2 >= start and index_2 < end:
                     continue
                 temp_temp_temp_makefile_content[index_2] = '\n'
-            temp_makefile_content += ''.join(temp_temp_temp_makefile_content)
+            temp_makefile_content.extend(temp_temp_temp_makefile_content)
             temp_temp_temp_makefile_content = []
             continue
         
         if temp_line.startswith('ifeq') or temp_line.startswith('ifneq'):
             has_guarding = True
-            temp_temp_makefile_content += line_4
+            temp_temp_makefile_content.append(line_4)
             nest_level += 1
-            temp_temp_makefile_content += f"$(info PREPROCESS {nest_level})\n"
+            temp_temp_makefile_content.append(f"$(info PREPROCESS {nest_level})\n")
             temp_temp_temp_makefile_content.append(line_4)
             guard_nest_level += 1
             separator = 0
             separator_list.append(separator)
         else:
-            temp_makefile_content += line_4
+            temp_makefile_content.append(line_4)
 
 with open(makefile_preprocessed_path, "w") as file_3:
-    file_3.write(temp_makefile_content)
+    file_3.write(''.join(temp_makefile_content))
     file_3.flush()
 sys.exit()
 # Open the main makefile that you're going to put your build command into
 with open(makefile_path, "r") as file:
     lines = file.readlines()
     for index, line in enumerate(lines):
-        temp_makefile_content += line
+        temp_makefile_content.append(line)
 
         # search for all variables
         if re.search(variable_regex, line):
@@ -203,10 +218,10 @@ with open(makefile_path, "r") as file:
                 # Regardless if database contains the variable, evaluates the value
                 # Because what if the variable has changed value?
                 with open(temp_makefile_path, "w") as file_2:
-                    temp_temp_makefile_content = temp_makefile_content
-                    temp_temp_makefile_content += f"$(info {match_string}={match})\n"
+                    temp_temp_makefile_content = temp_makefile_content.copy()
+                    temp_temp_makefile_content.append(f"$(info {match_string}={match})\n")
                     # the content only be written after the file descriptor is closed, well, unless you call file.flush()
-                    file_2.write(temp_temp_makefile_content)
+                    file_2.write(''.join(temp_temp_makefile_content))
 
                 # Call a process to execute `make` command, copy my current environment to it
                 process = subprocess.Popen(['make', '-f', temp_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
@@ -223,7 +238,7 @@ with open(makefile_path, "r") as file:
                 # remove trailing whitespace, else, later compare `==` will treat it differently
                 output_stripped = output_stripped.strip()
                 line_number = str(index+1)
-                output_to_write = makefile_path + ':' + line_number + ':' + output_stripped + '\n'
+                output_to_write.append(makefile_path + ':' + line_number + ':' + output_stripped + '\n')
                 # this is for the matching later, i dont want to write into database if
                 # PATH=abc already existed in the database
                 # But if PATH=def, that is, same varaible name, but different value, then write into database
@@ -235,14 +250,14 @@ with open(makefile_path, "r") as file:
                     # if diff value, WRITE IT TO DATABASE
                     if the_value != output_to_match_for_the_value and \
                         output:
-                        makefile_database_file.write(output_to_write)
+                        makefile_database_file.write(''.join(output_to_write))
                         makefile_database_file.flush()
 
                 else:
                     # else, write into database
                     # only write when `output` has something
                     if output:
-                        makefile_database_file.write(output_to_write)
+                        makefile_database_file.write(''.join(output_to_write))
                         makefile_database_file.flush()
                     
         # search for included makefile
@@ -271,10 +286,10 @@ with open(makefile_path, "r") as file:
 
             # no need + '\n', the `line` already included it
             # if you put, above code will error out of index when doing stripping
-            output_to_write = makefile_path + ':' + str(index + 1) + ':' + temp_line
+            output_to_write.append(makefile_path + ':' + str(index + 1) + ':' + temp_line)
             makefile_database_file.close()
             makefile_database_file = open(makefile_database_path, "a")
-            makefile_database_file.write(output_to_write)
+            makefile_database_file.write(''.join(output_to_write))
             makefile_database_file.flush()
 
             # line = include ../path/to/directory\n
