@@ -13,6 +13,17 @@
 # That is, putting your Makefile_Preprocessed.mk in any dir, it wont affact the outcome.
 # As long as your terminal is at the right directory, you're fine
 
+# Note:
+# By doing subprocess.Popen('bash', '-c', 'path/to/bash/script')
+# doesnt solve the debugging to setup the environments
+# But in real execution ok
+# when you launch debugger, it openup a new terminal
+# So i need to make that terminal to setup environment
+# But keeps failing
+# copying envirnoment no use, cos this code happens only after debugger opened up a new terminal
+# so what you copied, is the terminal opened up by debugger
+# using task.json also no use
+
 import sys
 import re
 import subprocess
