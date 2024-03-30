@@ -46,201 +46,222 @@ makefile_database_file = open(makefile_database_path, "w")
 makefile_database_file.close()
 
 
-# Pre-processing, settle all the guardings
-with open(makefile_path, "r") as file:
-    has_guarding = False
-    prepare_for_war = False
-    lines_2 = []
-    temp_makefile_content = []
-    temp_temp_makefile_content = []
-    # this is for appending to the official write buffer
-    temp_temp_temp_makefile_content = []
-    temp_temp_temp_temp_makefile_content = []
-    # this is for cases like
-    # ifeq...
-    # else ifeq...
-    # endif
-    # so, it's a nested ifeq, i have to know which evaluaetes to true
-    guard_nest_level = 0
-    endif_regex = r"^\s*endif\s*"  # Detech `endif` word, optional leading & trailing whitespace
-    temp_line = ''
-    temp_temp_temp_line = ''
-    temp_temp_line = ''
-    command = []
-    process = None
-    output = None
-    error = None
-    error_decoded = ''
-    error_list = []
-    output_decoded = ''
-    output_list = []
-    output_stripped = []
-    index_3 = 0
-    output_list_0 = ''
-    match_2 = None
+# # Pre-processing, settle all the guardings
+# with open(makefile_path, "r") as file:
+#     has_guarding = False
+#     prepare_for_war = False
+#     lines_2 = []
+#     temp_makefile_content = []
+#     temp_temp_makefile_content = []
+#     # this is for appending to the official write buffer
+#     temp_temp_temp_makefile_content = []
+#     temp_temp_temp_temp_makefile_content = []
+#     # this is for cases like
+#     # ifeq...
+#     # else ifeq...
+#     # endif
+#     # so, it's a nested ifeq, i have to know which evaluaetes to true
+#     guard_nest_level = 0
+#     endif_regex = r"^\s*endif\s*"  # Detech `endif` word, optional leading & trailing whitespace
+#     temp_line = ''
+#     temp_temp_temp_line = ''
+#     temp_temp_line = ''
+#     command = []
+#     process = None
+#     output = None
+#     error = None
+#     error_decoded = ''
+#     error_list = []
+#     output_decoded = ''
+#     output_list = []
+#     output_stripped = []
+#     index_3 = 0
+#     output_list_0 = ''
+#     match_2 = None
 
 
-    lines_2 = file.readlines()
-    for line_4 in lines_2:
+#     lines_2 = file.readlines()
+#     for line_4 in lines_2:
 
-        temp_line = line_4.lstrip()  # trim leading whitespace
-        temp_temp_temp_line = line_4[:-1]  # remove newline at the end
-        # Given $(ABC)=1,
-        # Replace $(ABC) to $$(ABC), so that when you run the makefile code,
-        # It will output `$(ABC)` instead of `1`
-        temp_temp_temp_line = temp_temp_temp_line.replace("$(", "$$(")
-        temp_temp_temp_line = temp_temp_temp_line.replace("${", "$${")
-        # Reason i put `""`,
-        # Given `     $(ABC)`
-        # When you run makefile code,
-        # It will output the whitespace as well
-        # But in the output, it will output `""`, so you gotta remove it later
-        temp_temp_line = f'$(info "{temp_temp_temp_line}")\n'
+#         temp_line = line_4.lstrip()  # trim leading whitespace
+#         temp_temp_temp_line = line_4[:-1]  # remove newline at the end
+#         # Given $(ABC)=1,
+#         # Replace $(ABC) to $$(ABC), so that when you run the makefile code,
+#         # It will output `$(ABC)` instead of `1`
+#         temp_temp_temp_line = temp_temp_temp_line.replace("$(", "$$(")
+#         temp_temp_temp_line = temp_temp_temp_line.replace("${", "$${")
+#         # Reason i put `""`,
+#         # Given `     $(ABC)`
+#         # When you run makefile code,
+#         # It will output the whitespace as well
+#         # But in the output, it will output `""`, so you gotta remove it later
+#         temp_temp_line = f'$(info "{temp_temp_temp_line}")\n'
 
-        if line_4.isspace(): # if the line is just whitespace & newline, just make it into newline
-            temp_temp_line = '\n'
+#         if line_4.isspace(): # if the line is just whitespace & newline, just make it into newline
+#             temp_temp_line = '\n'
 
-        if has_guarding:
+#         if has_guarding:
 
-            if temp_line.startswith('ifeq') or \
-                temp_line.startswith('ifneq'):
-                guard_nest_level += 1
+#             if temp_line.startswith('ifeq') or \
+#                 temp_line.startswith('ifneq'):
+#                 guard_nest_level += 1
 
-                temp_temp_makefile_content.append(line_4)
-                temp_temp_temp_makefile_content.append(line_4)
-                continue
+#                 temp_temp_makefile_content.append(line_4)
+#                 temp_temp_temp_makefile_content.append(line_4)
+#                 continue
 
-            if temp_line.startswith('endif'):
-                temp_temp_makefile_content.append(line_4)
-                guard_nest_level -= 1
+#             if temp_line.startswith('endif'):
+#                 temp_temp_makefile_content.append(line_4)
+#                 guard_nest_level -= 1
             
-            if temp_line.startswith('endif') and\
-                guard_nest_level == 0:
-                temp_temp_temp_makefile_content.append(line_4)
-                has_guarding = False
-                prepare_for_war = True
-            elif temp_line.startswith('else'):
-                temp_temp_makefile_content.append(line_4)
-                temp_temp_temp_makefile_content.append(line_4)
-                continue
-            else:
-                # if is `endif` line, dont append
-                if temp_line.startswith("endif"):
-                    pass
-                else:
-                    temp_temp_makefile_content.append(temp_temp_line)
+#             if temp_line.startswith('endif') and\
+#                 guard_nest_level == 0:
+#                 temp_temp_temp_makefile_content.append(line_4)
+#                 has_guarding = False
+#                 prepare_for_war = True
+#             elif temp_line.startswith('else'):
+#                 temp_temp_makefile_content.append(line_4)
+#                 temp_temp_temp_makefile_content.append(line_4)
+#                 continue
+#             else:
+#                 # if is `endif` line, dont append
+#                 if temp_line.startswith("endif"):
+#                     pass
+#                 else:
+#                     temp_temp_makefile_content.append(temp_temp_line)
 
-                temp_temp_temp_makefile_content.append(line_4)
-                continue
+#                 temp_temp_temp_makefile_content.append(line_4)
+#                 continue
         
-        # write to a preprocessed file
-        # then execute `make` on that file
-        # get returned output from that file
-        # decides which part of code to be included
-        if prepare_for_war:
+#         # write to a preprocessed file
+#         # then execute `make` on that file
+#         # get returned output from that file
+#         # decides which part of code to be included
+#         if prepare_for_war:
 
-            # append `$(info "endif")` at the end
-            # because there might be some random makefile error after running the makefile
-            # using this endif to tell me not to include any outputs that outputs after this `endif` output
-            temp_temp_makefile_content.append(temp_temp_line)
-            temp_temp_temp_temp_maekfile_content = []
-            temp_temp_temp_temp_maekfile_content = temp_makefile_content.copy()
-            temp_temp_temp_temp_maekfile_content.extend(temp_temp_makefile_content)
-            temp_temp_makefile_content = []
+#             # append `$(info "endif")` at the end
+#             # because there might be some random makefile error after running the makefile
+#             # using this endif to tell me not to include any outputs that outputs after this `endif` output
+#             temp_temp_makefile_content.append(temp_temp_line)
+#             temp_temp_temp_temp_maekfile_content = []
+#             temp_temp_temp_temp_maekfile_content = temp_makefile_content.copy()
+#             temp_temp_temp_temp_maekfile_content.extend(temp_temp_makefile_content)
+#             temp_temp_makefile_content = []
 
-            with open(makefile_preprocessed_path, "w") as file_3:
-                file_3.write(''.join(temp_temp_temp_temp_maekfile_content))
-                file_3.flush()
-            prepare_for_war = False
+#             with open(makefile_preprocessed_path, "w") as file_3:
+#                 file_3.write(''.join(temp_temp_temp_temp_maekfile_content))
+#                 file_3.flush()
+#             prepare_for_war = False
 
-            # You have to pass in argument by list
-            # eg: 'make' '-f' '/path/to/Makefile' 'target_recipe' 'var=1'
-            command = ['make', '-f', makefile_preprocessed_path]
-            command.extend(makefile_command)
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
-            output, error = process.communicate()
-            # The error here mainly for debugging purposes only
-            # so that i can hover over it to see the value
-            error_decoded = error.decode("utf-8")
-            error_list = [item[1:-1] + '\n' for item in error_decoded.split('\n')]
-            output_decoded = output.decode("utf-8")
-            output_list = [item[1:-1] + '\n' for item in output_decoded.split('\n')]
-            output_stripped = []
+#             # You have to pass in argument by list
+#             # eg: 'make' '-f' '/path/to/Makefile' 'target_recipe' 'var=1'
+#             command = ['make', '-f', makefile_preprocessed_path]
+#             command.extend(makefile_command)
+#             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
+#             output, error = process.communicate()
+#             # The error here mainly for debugging purposes only
+#             # so that i can hover over it to see the value
+#             error_decoded = error.decode("utf-8")
+#             error_list = [item[1:-1] + '\n' for item in error_decoded.split('\n')]
+#             output_decoded = output.decode("utf-8")
+#             output_list = [item[1:-1] + '\n' for item in output_decoded.split('\n')]
+#             output_stripped = []
             
-            temp_temp_temp_temp_makefile_content = temp_temp_temp_makefile_content.copy()
-            index_3 = -1
-            for line_5 in temp_temp_temp_makefile_content:
-                index_3 += 1
-                output_list_0 = output_list[0]
-                match_2 = re.match(endif_regex, output_list_0)
-                # `endif` found, what comes after the list probably random makefile error, ends here
-                if match_2:
-                    # before end, repalce the all the element starting from current index to newline
-                    temp_temp_temp_temp_makefile_content[index_3:] = ['\n'] * (len(temp_temp_temp_temp_makefile_content) - index_3)
-                    break
+#             temp_temp_temp_temp_makefile_content = temp_temp_temp_makefile_content.copy()
+#             index_3 = -1
+#             for line_5 in temp_temp_temp_makefile_content:
+#                 index_3 += 1
+#                 output_list_0 = output_list[0]
+#                 match_2 = re.match(endif_regex, output_list_0)
+#                 # `endif` found, what comes after the list probably random makefile error, ends here
+#                 if match_2:
+#                     # before end, repalce the all the element starting from current index to newline
+#                     temp_temp_temp_temp_makefile_content[index_3:] = ['\n'] * (len(temp_temp_temp_temp_makefile_content) - index_3)
+#                     break
                 
-                if line_5 == output_list[0]:
-                    output_list.pop(0)
-                else:
-                    temp_temp_temp_temp_makefile_content[index_3] = '\n'
+#                 if line_5 == output_list[0]:
+#                     output_list.pop(0)
+#                 else:
+#                     temp_temp_temp_temp_makefile_content[index_3] = '\n'
 
-            temp_makefile_content.extend(temp_temp_temp_temp_makefile_content)
-            temp_temp_temp_temp_makefile_content = []
-            temp_temp_temp_makefile_content = []
-            continue
+#             temp_makefile_content.extend(temp_temp_temp_temp_makefile_content)
+#             temp_temp_temp_temp_makefile_content = []
+#             temp_temp_temp_makefile_content = []
+#             continue
         
-        if temp_line.startswith('ifeq') or temp_line.startswith('ifneq'):
-            has_guarding = True
-            temp_temp_makefile_content.append(line_4)
-            temp_temp_temp_makefile_content.append(line_4)
-            guard_nest_level += 1
-        else:
-            temp_makefile_content.append(line_4)
+#         if temp_line.startswith('ifeq') or temp_line.startswith('ifneq'):
+#             has_guarding = True
+#             temp_temp_makefile_content.append(line_4)
+#             temp_temp_temp_makefile_content.append(line_4)
+#             guard_nest_level += 1
+#         else:
+#             temp_makefile_content.append(line_4)
 
-    # Reset variable
-    has_guarding = False
-    prepare_for_war = False
-    lines_2 = []
-    temp_makefile_content = []
-    temp_temp_makefile_content = []
-    temp_temp_temp_makefile_content = []
-    temp_temp_temp_temp_makefile_content = []
-    guard_nest_level = 0
-    endif_regex = r"^\s*endif\s*"
-    temp_line = ''
-    temp_temp_temp_line = ''
-    temp_temp_line = ''
-    command = []
-    process = None
-    output = None
-    error = None
-    error_decoded = ''
-    error_list = []
-    output_decoded = ''
-    output_list = []
-    output_stripped = []
-    index_3 = 0
-    output_list_0 = ''
-    match_2 = None
+#     # Reset variable
+#     has_guarding = False
+#     prepare_for_war = False
+#     lines_2 = []
+#     temp_makefile_content = []
+#     temp_temp_makefile_content = []
+#     temp_temp_temp_makefile_content = []
+#     temp_temp_temp_temp_makefile_content = []
+#     guard_nest_level = 0
+#     endif_regex = r"^\s*endif\s*"
+#     temp_line = ''
+#     temp_temp_temp_line = ''
+#     temp_temp_line = ''
+#     command = []
+#     process = None
+#     output = None
+#     error = None
+#     error_decoded = ''
+#     error_list = []
+#     output_decoded = ''
+#     output_list = []
+#     output_stripped = []
+#     index_3 = 0
+#     output_list_0 = ''
+#     match_2 = None
 
-with open(makefile_preprocessed_path, "w") as file_4:
-    file_4.write(''.join(temp_makefile_content))
-    file_4.flush()
+# with open(makefile_preprocessed_path, "w") as file_4:
+#     file_4.write(''.join(temp_makefile_content))
+#     file_4.flush()
     
-sys.exit()
 
 
 
 
 
-
-# Open the main makefile that you're going to put your build command into
+# This one do the makefile dictionary
 with open(makefile_path, "r") as file:
     # Matches ${...}, $(...)
     variable_regex = r'\$[\(\{][a-zA-Z0-9_-]+[\)\}]'
     lines = []
     temp_makefile_content = []
-
+    matches = None
+    makefile_database_lines = []
+    match_string = ''
+    string_to_search_for = ''
+    makefile_database_file = None
+    found = False
+    the_value = ''
+    stripped_line = ''
+    temp_temp_makefile_content = []
+    process = None
+    output = None
+    error = None
+    error_decoded = ''
+    error_list = []
+    output_decoded = ''
+    output_list = []
+    output_stripped = []
+    line_number = 0
+    output_to_write = []
+    output_to_match_for_the_value = []
+    temp_line = ''
+    append_path = ''
+    current_makefile = ''
+    new_makefile_path = ''
 
     lines = file.readlines()
 
@@ -251,8 +272,7 @@ with open(makefile_path, "r") as file:
         if re.search(variable_regex, line):
             matches = re.findall(variable_regex, line)
             for match in matches:
-                # Search weather this variable is existed in the databse
-                makefile_database_file.seek(0)
+                output_to_write = []
 
                 # Just wanna make it to write `$(info VAR=$(VAR))`
                 # So when run make, it will print `VAR=value`
@@ -262,11 +282,9 @@ with open(makefile_path, "r") as file:
                 
                 string_to_search_for = match_string + '='
                 
-                # because i changed to open the file always to truncate it
-                # then when do readlines() will fail with exception
-                # the solution is to close and open with `r` option again, `a` those does not work
-                makefile_database_file.close()
                 makefile_database_file = open(makefile_database_path, "r")
+                # Search weather this variable is existed in the databse
+                makefile_database_file.seek(0)
                 
                 makefile_database_lines = makefile_database_file.readlines()
 
@@ -347,6 +365,7 @@ with open(makefile_path, "r") as file:
             makefile_database_file = open(makefile_database_path, "r")
             makefile_database_lines = makefile_database_file.readlines()
             matches = re.findall(variable_regex, line)
+            output_to_write = []
 
             # If there is, replace the variable with the value found in the database
             for match in matches:
@@ -389,8 +408,8 @@ with open(makefile_path, "r") as file:
                 new_makefile_path = append_path
             process = subprocess.Popen(['make', '-f', new_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
             output, error = process.communicate()
-            print(output)
-            print(error)
+            # print(output)
+            # print(error)
 
 makefile_database_file.close()
 print("Script Ends")
