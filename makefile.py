@@ -51,6 +51,7 @@ make_file_content = []
 with open(makefile_path, "r") as file:
     has_guarding = False
     prepare_for_war = False
+    is_target_recipe = False
     lines_2 = []
     temp_makefile_content = []
     temp_temp_makefile_content = []
@@ -63,10 +64,28 @@ with open(makefile_path, "r") as file:
     # endif
     # so, it's a nested ifeq, i have to know which evaluaetes to true
     guard_nest_level = 0
-    endif_regex = r"^\s*endif\s*"  # Detech `endif` word, optional leading & trailing whitespace
+    endif_regex = r"^\s*endif\s*"  # detect `endif` word, optional leading & trailing whitespace
+    # detect target recipe, tested in python regex online
+    # Explanation:
+    # Must not begin with whitespace
+    # Match anything in the bracket, one or more
+    # Optional whitespace
+    # Must ':'
+    # List of test:
+    # ABC : DEF
+    #  ABC : DEF
+    # ABC :
+    # $(DSP): TAR
+    # ${GG}:
+    # abc-def:
+    # ABC $(ABC):
+    # ABC $(ABC) :
+    # $(ABC)/$(DEF)_$(GHI)_EFF:
+    target_recipe_regex = r"^[^\s][a-zA-Z0-9$(){}\s*/_-]+\s*:"
     temp_line = ''
-    temp_temp_temp_line = ''
     temp_temp_line = ''
+    temp_temp_temp_line = ''
+    temp_temp_temp_temp_line = ''
     command = []
     process = None
     output = None
@@ -75,7 +94,6 @@ with open(makefile_path, "r") as file:
     error_list = []
     output_decoded = ''
     output_list = []
-    output_stripped = []
     index_3 = 0
     output_list_0 = ''
     match_2 = None
@@ -83,7 +101,8 @@ with open(makefile_path, "r") as file:
 
     lines_2 = file.readlines()
     for line_4 in lines_2:
-
+        if line_4.startswith("BBF:"):
+                print("YAA")
         temp_line = line_4.lstrip()  # trim leading whitespace
         temp_temp_temp_line = line_4[:-1]  # remove newline at the end
         # Given $(ABC)=1,
@@ -120,6 +139,7 @@ with open(makefile_path, "r") as file:
                 temp_temp_temp_makefile_content.append(line_4)
                 has_guarding = False
                 prepare_for_war = True
+                is_target_recipe = False
             elif temp_line.startswith('else'):
                 temp_temp_makefile_content.append(line_4)
                 temp_temp_temp_makefile_content.append(line_4)
@@ -166,8 +186,8 @@ with open(makefile_path, "r") as file:
             error_list = [item[1:-1] + '\n' for item in error_decoded.split('\n')]
             output_decoded = output.decode("utf-8")
             output_list = [item[1:-1] + '\n' for item in output_decoded.split('\n')]
-            output_stripped = []
             
+            # eliminate all, replace all to newline, except the line that matches with the `output_list`
             temp_temp_temp_temp_makefile_content = temp_temp_temp_makefile_content.copy()
             index_3 = -1
             for line_5 in temp_temp_temp_makefile_content:
@@ -180,8 +200,12 @@ with open(makefile_path, "r") as file:
                     temp_temp_temp_temp_makefile_content[index_3:] = ['\n'] * (len(temp_temp_temp_temp_makefile_content) - index_3)
                     break
                 
+                # if match, remove from list, that means, the one that i dont want to replace to newline, is found
+                # Once we removed from list, keep going until we found `endif`
+                # once `endif` is found, time to exit this sub-operation
                 if line_5 == output_list[0]:
                     output_list.pop(0)
+                    temp_temp_temp_temp_makefile_content[index_3] = '#TOREMOVE ' + temp_temp_temp_temp_makefile_content[index_3]
                 else:
                     temp_temp_temp_temp_makefile_content[index_3] = '\n'
 
@@ -196,13 +220,27 @@ with open(makefile_path, "r") as file:
             temp_temp_temp_makefile_content.append(line_4)
             guard_nest_level += 1
         else:
-            temp_makefile_content.append(line_4)
+            if re.match(target_recipe_regex, line_4):
+                temp_temp_temp_temp_line = '#TOREMOVE ' + line_4
+                temp_makefile_content.append(temp_temp_temp_temp_line)
+                is_target_recipe = True
+            elif is_target_recipe:
+                temp_temp_temp_temp_line = '#TOREMOVE ' + line_4
+                temp_makefile_content.append(temp_temp_temp_temp_line)
+            else:
+                temp_makefile_content.append(line_4)
     
+
+    # remove all thsoe '#TOREMOVE ' that i put
     make_file_content = temp_makefile_content.copy()
+    for index_4, line_6 in enumerate(temp_makefile_content):
+        if line_6.startswith('#TOREMOVE '):
+            make_file_content[index_4] = line_6[len('#TOREMOVE '):]
 
     # Reset variable
     has_guarding = False
     prepare_for_war = False
+    is_target_recipe = False
     lines_2 = []
     temp_makefile_content = []
     temp_temp_makefile_content = []
@@ -221,7 +259,6 @@ with open(makefile_path, "r") as file:
     error_list = []
     output_decoded = ''
     output_list = []
-    output_stripped = []
     index_3 = 0
     output_list_0 = ''
     match_2 = None
