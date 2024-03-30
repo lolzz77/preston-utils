@@ -67,10 +67,12 @@ with open(makefile_path, "r") as file:
     endif_regex = r"^\s*endif\s*"  # detect `endif` word, optional leading & trailing whitespace
     # detect target recipe, tested in python regex online
     # Explanation:
+    # Must not start with (?!keywords), and comment
     # Must not begin with whitespace
     # Match anything in the bracket, one or more
     # Optional whitespace
     # Must ':'
+    # Cannot contain `=` after that
     # List of test:
     # ABC : DEF
     #  ABC : DEF
@@ -81,11 +83,19 @@ with open(makefile_path, "r") as file:
     # ABC $(ABC):
     # ABC $(ABC) :
     # $(ABC)/$(DEF)_$(GHI)_EFF:
-    target_recipe_regex = r"^[^\s][a-zA-Z0-9$(){}\s*/_-]+\s*:"
+    # export ABC:=123
+    # ABC :=
+    # ABC : =   (For this one, 
+    #           it will match, and maekfile will not fail for typing like this, but dont worry,
+    #           if you type like this, the variable is not assigned, despite makefile still can run
+    # ABC =:
+    # #command: abc
+    target_recipe_regex = r"^(?!#|export|ifeq|ifneq|else|endif)[^\s][a-zA-Z0-9$(){}\s*/_-]+\s*:[^=]"
     temp_line = ''
     temp_temp_line = ''
     temp_temp_temp_line = ''
     temp_temp_temp_temp_line = ''
+    temp_temp_temp_temp_temp_temp_line = ''
     command = []
     process = None
     output = None
@@ -101,10 +111,8 @@ with open(makefile_path, "r") as file:
 
     lines_2 = file.readlines()
     for line_4 in lines_2:
-        if line_4.startswith("BBF:"):
-                print("YAA")
         temp_line = line_4.lstrip()  # trim leading whitespace
-        temp_temp_temp_line = line_4[:-1]  # remove newline at the end
+        temp_temp_temp_line = line_4[:-1]  # remgit stove newline at the end
         # Given $(ABC)=1,
         # Replace $(ABC) to $$(ABC), so that when you run the makefile code,
         # It will output `$(ABC)` instead of `1`
@@ -139,7 +147,6 @@ with open(makefile_path, "r") as file:
                 temp_temp_temp_makefile_content.append(line_4)
                 has_guarding = False
                 prepare_for_war = True
-                is_target_recipe = False
             elif temp_line.startswith('else'):
                 temp_temp_makefile_content.append(line_4)
                 temp_temp_temp_makefile_content.append(line_4)
@@ -205,13 +212,33 @@ with open(makefile_path, "r") as file:
                 # once `endif` is found, time to exit this sub-operation
                 if line_5 == output_list[0]:
                     output_list.pop(0)
-                    temp_temp_temp_temp_makefile_content[index_3] = '#TOREMOVE ' + temp_temp_temp_temp_makefile_content[index_3]
+
+                    # Because in cases like
+                    # #a-commented-target_recipe: 
+                    #         code
+                    # The code contains whitespace, thus, makefile will fail without printin anything
+                    # so, my solution is to trim the whitespace, then, add '#number:TO_ADD_BACK_WHITESPACE` to add back white space later
+                    # 1 equals to 1 '\t'
+                    # later add back, add the number of '\t'
+                    # Reason i put `number:TO_ADD_BACK_WHITESPACE` is so that i can use `endswith("TO_ADD_BACK_WHITESPACE")`
+                    leading_whitespace_length = len(temp_temp_temp_temp_makefile_content[index_3]) - len(temp_temp_temp_temp_makefile_content[index_3].lstrip())
+                    temp_temp_temp_temp_makefile_content[index_3] = temp_temp_temp_temp_makefile_content[index_3][:-1]
+                    temp_temp_temp_temp_makefile_content[index_3] = temp_temp_temp_temp_makefile_content[index_3].lstrip()
+                    temp_temp_temp_temp_makefile_content[index_3] = temp_temp_temp_temp_makefile_content[index_3] + '#' + str(leading_whitespace_length) + ':TO_ADD_BACK_WHITESPACE\n'
+
+                    if is_target_recipe:
+                        temp_temp_temp_temp_makefile_content[index_3] = '#TOREMOVE ' + temp_temp_temp_temp_makefile_content[index_3]
+
                 else:
                     temp_temp_temp_temp_makefile_content[index_3] = '\n'
 
             temp_makefile_content.extend(temp_temp_temp_temp_makefile_content)
             temp_temp_temp_temp_makefile_content = []
             temp_temp_temp_makefile_content = []
+            # here set it to False, cause i want anything falls under target_recipe, comment it
+            # cos most of the case, `ifeq` that under target_recipe, are mostly command that will execute compile/build/linking
+            # which will cause it to fail
+            is_target_recipe = False
             continue
         
         if temp_line.startswith('ifeq') or temp_line.startswith('ifneq'):
@@ -237,6 +264,19 @@ with open(makefile_path, "r") as file:
         if line_6.startswith('#TOREMOVE '):
             make_file_content[index_4] = line_6[len('#TOREMOVE '):]
 
+    temp_makefile_content = make_file_content.copy()
+    # add back all the whitespaces
+    make_file_content = temp_makefile_content.copy()
+    for index_5, line_7 in enumerate(temp_makefile_content):
+        if line_7.endswith('TO_ADD_BACK_WHITESPACE\n'):
+            temp_temp_temp_temp_temp_line = line_7[: - len(":TO_ADD_BACK_WHITESPACE\n")]
+            number_of_whitespace = int(temp_temp_temp_temp_temp_line[-1])
+            for _ in range(number_of_whitespace):
+                temp_temp_temp_temp_temp_line = '\t' + temp_temp_temp_temp_temp_line
+            temp_temp_temp_temp_temp_line = temp_temp_temp_temp_temp_line[:-2]
+            temp_temp_temp_temp_temp_line += '\n'
+            make_file_content[index_5] = temp_temp_temp_temp_temp_line
+
     # Reset variable
     has_guarding = False
     prepare_for_war = False
@@ -249,8 +289,9 @@ with open(makefile_path, "r") as file:
     guard_nest_level = 0
     endif_regex = r"^\s*endif\s*"
     temp_line = ''
-    temp_temp_temp_line = ''
     temp_temp_line = ''
+    temp_temp_temp_line = ''
+    temp_temp_temp_temp_temp_temp_line = ''
     command = []
     process = None
     output = None
