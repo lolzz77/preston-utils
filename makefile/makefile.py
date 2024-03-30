@@ -480,4 +480,7 @@ with open(makefile_preprocessed_path, "r") as file:
 
 make_file_content = []
 makefile_database_file.close()
+
+# remove files at the end of script
+os.remove(temp_makefile_path)
 print("Script Ends")
