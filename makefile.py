@@ -48,17 +48,21 @@ with open(makefile_path, "r") as file:
     # so, it's a nested ifeq, i have to know which evaluaetes to true
     nest_level = 0
     nest_level_finalized = 0
-    endif_nest_level = 0
+    guard_nest_level = 0
     for line_4 in lines:
         separator += 1
         temp_line = line_4.lstrip()
 
         if has_guarding:
-            if temp_line.startswith('endif'):
-                endif_nest_level += 1
 
+            if temp_line.startswith('ifeq') or \
+                temp_line.startswith('ifneq'):
+                guard_nest_level += 1
+            if temp_line.startswith('endif'):
+                guard_nest_level -= 1
+            
             if temp_line.startswith('endif') and\
-                endif_nest_level == nest_level-1:
+                guard_nest_level == 0:
                 temp_temp_makefile_content += line_4
                 temp_temp_temp_makefile_content.append(line_4)
                 has_guarding = False
@@ -109,6 +113,7 @@ with open(makefile_path, "r") as file:
             # then, using star tand end value, which is 2 and 4
             # i can strip the temp_temp_temp_makefile starting from index 2 to index 4
             # End result, i will get temp_temp_temp_makefile list = ['\tVALUE B\n']
+            # Update: i changed to instead of popping the list, replace the content of string to newline
             for _ in range(nest_level_finalized-1):
                 separator_list.pop(0)
 
@@ -116,11 +121,13 @@ with open(makefile_path, "r") as file:
             end = separator_list[1]
             separator_list = []
             separator = 0
-            endif_nest_level = 0
             nest_level = 0
             nest_level_finalized = 0
 
-            temp_temp_temp_makefile_content = temp_temp_temp_makefile_content[start:end]
+            for index_2, line_5 in enumerate(temp_temp_temp_makefile_content):
+                if index_2 >= start and index_2 < end:
+                    continue
+                temp_temp_temp_makefile_content[index_2] = '\n'
             temp_makefile_content += ''.join(temp_temp_temp_makefile_content)
             temp_temp_temp_makefile_content = []
             continue
@@ -131,6 +138,7 @@ with open(makefile_path, "r") as file:
             nest_level += 1
             temp_temp_makefile_content += f"$(info PREPROCESS {nest_level})\n"
             temp_temp_temp_makefile_content.append(line_4)
+            guard_nest_level += 1
             separator = 0
             separator_list.append(separator)
         else:
