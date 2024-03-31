@@ -100,5 +100,12 @@
                 "VAR1=VAR1 VAR2=VAR2"
             ]
         },
+        {
+            "type": "python",
+            "request": "launch",
+            "name": "Python - Makefil - Unit Test",
+            "program": "/data/c-script-append-log-in-all-files-and-functions/makefile/test.py",
+            "cwd" : "/data/c-script-append-log-in-all-files-and-functions/makefile/",
+        },
     ]
 }
