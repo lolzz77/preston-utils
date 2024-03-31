@@ -1,3 +1,5 @@
+# TODO: Implement watchdog, in case unlimited loops, watchdog terinate the script
+
 # Usage : python3 [path to this script] [path to the Makefile you want] ["the command you pass into the Makefile, with double quote"]
 
 # Cautions:

@@ -19,60 +19,18 @@ variable_regex = r"\$[\(\{][a-zA-Z0-9_-]+[\)\}]"
 
 # detect target recipe, tested in python regex online
 # Explanation:
-# Must not start with (?!keywords), and comment
+# Must not start with (?!keywords)
 # Must not begin with whitespace
 # Match anything in the bracket, one or more
 # Optional whitespace
 # Must ':'
 # Cannot contain `=` after that
-target_recipe_regex = r"^(?!#|export|ifeq|ifneq|else|endif)[^\t][a-zA-Z0-9$(){}\t*/_-]+\t*:[^=]"
-# List of test
-# ABC : DEF
-#  ABC : DEF
-# ABC :
-# $(DSP): TAR
-# ${GG}:
-# abc-def:
-# ABC $(ABC):
-# ABC $(ABC) :
-# $(ABC)/$(DEF)_$(GHI)_EFF:
-# export ABC:=123
-# ABC :=
-# ABC : =   (For this one, 
-#           it will match, and maekfile will not fail for typing like this, but dont worry,
-#           if you type like this, the variable is not assigned, despite makefile still can run
-# ABC =:
-# #command: abc
+target_recipe_regex = r"^(?!export|ifeq|ifneq|else|endif)[^\s][a-zA-Z0-9$(){}\s*/_-]+\s*:[^=]"
 
 # Matches variable
 # eg: ABC=1, ABC:=1, export ABC=1
 # Explanation:
-# Must not start with comment
-variable_regex_2 = r"^(?!#)[a-zA-Z0-9$(){}\t*/_-]+:*="
-# List of test
-# ARM : DSP
-# ABC :
-# $(DSP): TAR
-# ${GG}:
-# abc-def:
-# DSP $(DSP):
-# DSP $(DSP) :
-# $(GEN)/$(target)_(fw)_OUT:
-# export ABC :
-# AXN : =
-# AXN = :
-# #COMMAND:
-# ABC = 1
-# ABC := 1
-# ABC=1
-# ABC:=1
-# export ABC=1
-#      ABC=1
-# $(ABC)=1
-# $(ABC):=1
-# #ABC=1
-#      #(ABC)=1
-
+variable_regex_2 = r"[a-zA-Z0-9$(){}\s*/_-]+:*="
 
 
 class RegexClass(unittest.TestCase):
@@ -177,6 +135,313 @@ class RegexClass(unittest.TestCase):
                 test_result = bool(re.search(regex_to_test, test_case[1]))
             with self.subTest(test_case=test_case):
                 self.assertEqual(test_result, test_case[2], f"Line {inspect.currentframe().f_lineno} : Test Case {index}")
+
+
+    def test_target_recipe_regex(self):
+        regex_to_test = target_recipe_regex
+        # Note: All the test cases here must end with newline
+        # Cos, target recipe confirm must end with newline
+        test_cases = [
+            [#0
+                'ARS : WER \
+                ',
+                True,
+            ],
+            [#1
+                'ABC : \
+                ',
+                True,
+            ],
+            [#2
+                '$(AFS): TAR \
+                ',
+                True,
+            ],
+            [#3
+                '${GG}: \
+                ',
+                True,
+            ],
+            [#4
+                'abc-def: \
+                ',
+                True,
+            ],
+            [#5
+                'QQQ $(QQQ): \
+                ',
+                True,
+            ],
+            [#6
+                'QQQ $(QQQ) : \
+                ',
+                True,
+            ],
+            [#7
+                '$(GEN)/$(VAR)_(abc)_DEF: \
+                ',
+                True,
+            ],
+            [#8
+                'export ABC : 123 \
+                ',
+                False,
+            ],
+            [#9
+                'export ABC := 123 \
+                ',
+                False,
+            ],
+            [#10
+                'AXN := \
+                ',
+                False,
+            ],
+            [#11
+                # TODO: need fix this?
+                # This is invalid syntax in makefile,
+                # Tho makefile will not fail, but the makefile output will be not expected
+                'AXN : = \
+                ',
+                False,
+            ],
+            [#12
+                'AXN = : \
+                ',
+                False,
+            ],
+            [#13
+                'AXN =: \
+                ',
+                False,
+            ],
+            [#14
+                # The script will handle commented code
+                '#COMMAND: \
+                ',
+                True,
+            ],
+            [#15
+                # The script will handle commented code
+                '#COMMAND:abc \
+                ',
+                True,
+            ],
+            [#16
+                'ABC = 1 \
+                ',
+                False,
+            ],
+            [#17
+                'ABC := 1 \
+                ',
+                False,
+            ],
+            [#18
+                'ABC=1 \
+                ',
+                False,
+            ],
+            [#19
+                'ABC:=1 \
+                ',
+                False,
+            ],
+            [#20
+                'export ABC=1 \
+                ',
+                False,
+            ],
+            [#21
+                '     ABC=1 \
+                ',
+                False,
+            ],
+            [#22
+                '$(ABC)=1 \
+                ',
+                False,
+            ],
+            [#23
+                '$(ABC):=1 \
+                ',
+                False,
+            ],
+            [#24
+                '#ABC=1 \
+                ',
+                False,
+            ],
+            [#25
+                '     #(ABC)=1 \
+                ',
+                False,
+            ],
+        ]
+
+        for index, test_case in enumerate(test_cases):
+            test_result = bool(re.search(regex_to_test, test_case[0]))
+            with self.subTest(test_case=test_case):
+                self.assertEqual(test_result, test_case[1], f"Line {inspect.currentframe().f_lineno} : Test Case {index}")
+
+    def test_target_recipe_regex(self):
+        regex_to_test = variable_regex_2
+        # Note: All the test cases here must end with newline
+        # Cos, target recipe confirm must end with newline
+        test_cases = [
+            [#0
+                'ARS : WER \
+                ',
+                False,
+            ],
+            [#1
+                'ABC : \
+                ',
+                False,
+            ],
+            [#2
+                '$(AFS): TAR \
+                ',
+                False,
+            ],
+            [#3
+                '${GG}: \
+                ',
+                False,
+            ],
+            [#4
+                'abc-def: \
+                ',
+                False,
+            ],
+            [#5
+                'QQQ $(QQQ): \
+                ',
+                False,
+            ],
+            [#6
+                'QQQ $(QQQ) : \
+                ',
+                False,
+            ],
+            [#7
+                '$(GEN)/$(VAR)_(abc)_DEF: \
+                ',
+                False,
+            ],
+            [#8
+                'export ABC : 123 \
+                ',
+                False,
+            ],
+            [#9
+                'export ABC := 123 \
+                ',
+                True,
+            ],
+            [#10
+                'AXN := \
+                ',
+                True,
+            ],
+            [#11
+                # TODO: need fix this?
+                # This is invalid syntax in makefile,
+                # Tho makefile will not fail, but the makefile output will be not expected
+                'AXN : = \
+                ',
+                True,
+            ],
+            [#12
+                'AXN = : \
+                ',
+                True,
+            ],
+            [#13
+                'AXN =: \
+                ',
+                True,
+            ],
+            [#14
+                # The script will handle commented code
+                '#COMMAND: \
+                ',
+                False,
+            ],
+            [#15
+                # The script will handle commented code
+                '#COMMAND:abc \
+                ',
+                False,
+            ],
+            [#16
+                # The script will handle commented code
+                '#COMMAND:=abc \
+                ',
+                True,
+            ],
+            [#17
+                # The script will handle commented code
+                '#COMMAND=abc \
+                ',
+                True,
+            ],
+            [#18
+                'ABC = 1 \
+                ',
+                True,
+            ],
+            [#19
+                'ABC := 1 \
+                ',
+                True,
+            ],
+            [#20
+                'ABC=1 \
+                ',
+                True,
+            ],
+            [#21
+                'ABC:=1 \
+                ',
+                True,
+            ],
+            [#22
+                'export ABC=1 \
+                ',
+                True,
+            ],
+            [#23
+                '     ABC=1 \
+                ',
+                True,
+            ],
+            [#24
+                '$(ABC)=1 \
+                ',
+                True,
+            ],
+            [#25
+                '$(ABC):=1 \
+                ',
+                True,
+            ],
+            [#26
+                '#ABC=1 \
+                ',
+                True,
+            ],
+            [#27
+                '     #(ABC)=1 \
+                ',
+                True,
+            ],
+        ]
+
+        for index, test_case in enumerate(test_cases):
+            test_result = bool(re.search(regex_to_test, test_case[0]))
+            with self.subTest(test_case=test_case):
+                self.assertEqual(test_result, test_case[1], f"Line {inspect.currentframe().f_lineno} : Test Case {index}")
 
 if __name__ == '__main__':
     unittest.main()
