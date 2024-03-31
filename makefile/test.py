@@ -30,6 +30,7 @@ target_recipe_regex = r"^(?!export|ifeq|ifneq|else|endif)[^\s][a-zA-Z0-9$(){}\s*
 # Matches variable
 # eg: ABC=1, ABC:=1, export ABC=1
 # Explanation:
+# start with anything, then must match either `:=` or `=`
 variable_regex_2 = r"[a-zA-Z0-9$(){}\s*/_-]+:*="
 
 
