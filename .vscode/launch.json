@@ -103,7 +103,7 @@
         {
             "type": "python",
             "request": "launch",
-            "name": "Python - Makefil - Unit Test",
+            "name": "Python - Makefile - Unit Test",
             "program": "/data/c-script-append-log-in-all-files-and-functions/makefile/test.py",
             "cwd" : "/data/c-script-append-log-in-all-files-and-functions/makefile/",
         },
