@@ -31,7 +31,7 @@ target_recipe_regex = r"^(?!export|ifeq|ifneq|else|endif)[^\s][a-zA-Z0-9$(){}\s*
 # eg: ABC=1, ABC:=1, export ABC=1
 # Explanation:
 # start with anything, then must match either `:=` or `=`
-variable_regex_2 = r"[a-zA-Z0-9$(){}\s*/_-]+:*="
+variable_regex_2 = r"[a-zA-Z0-9$(){}/_-]+\s*:*="
 
 
 class RegexClass(unittest.TestCase):
@@ -291,56 +291,67 @@ class RegexClass(unittest.TestCase):
         # Cos, target recipe confirm must end with newline
         test_cases = [
             [#0
+                're.search',
                 'ARS : WER \
                 ',
                 False,
             ],
             [#1
+                're.search',
                 'ABC : \
                 ',
                 False,
             ],
             [#2
+                're.search',
                 '$(AFS): TAR \
                 ',
                 False,
             ],
             [#3
+                're.search',
                 '${GG}: \
                 ',
                 False,
             ],
             [#4
+                're.search',
                 'abc-def: \
                 ',
                 False,
             ],
             [#5
+                're.search',
                 'QQQ $(QQQ): \
                 ',
                 False,
             ],
             [#6
+                're.search',
                 'QQQ $(QQQ) : \
                 ',
                 False,
             ],
             [#7
+                're.search',
                 '$(GEN)/$(VAR)_(abc)_DEF: \
                 ',
                 False,
             ],
             [#8
+                're.search',
                 'export ABC : 123 \
                 ',
                 False,
             ],
             [#9
+                're.search',
                 'export ABC := 123 \
                 ',
                 True,
             ],
             [#10
+                're.search',
                 'AXN := \
                 ',
                 True,
@@ -349,100 +360,132 @@ class RegexClass(unittest.TestCase):
                 # TODO: need fix this?
                 # This is invalid syntax in makefile,
                 # Tho makefile will not fail, but the makefile output will be not expected
+                're.search',
                 'AXN : = \
                 ',
-                True,
+                False,
             ],
             [#12
+                're.search',
                 'AXN = : \
                 ',
                 True,
             ],
             [#13
+                're.search',
                 'AXN =: \
                 ',
                 True,
             ],
             [#14
                 # The script will handle commented code
+                're.search',
                 '#COMMAND: \
                 ',
                 False,
             ],
             [#15
                 # The script will handle commented code
+                're.search',
                 '#COMMAND:abc \
                 ',
                 False,
             ],
             [#16
                 # The script will handle commented code
+                're.search',
                 '#COMMAND:=abc \
                 ',
                 True,
             ],
             [#17
                 # The script will handle commented code
+                're.search',
                 '#COMMAND=abc \
                 ',
                 True,
             ],
             [#18
+                're.search',
                 'ABC = 1 \
                 ',
                 True,
             ],
             [#19
+                're.search',
                 'ABC := 1 \
                 ',
                 True,
             ],
             [#20
+                're.search',
                 'ABC=1 \
                 ',
                 True,
             ],
             [#21
+                're.search',
                 'ABC:=1 \
                 ',
                 True,
             ],
             [#22
+                're.search',
                 'export ABC=1 \
                 ',
                 True,
             ],
             [#23
+                're.search',
                 '     ABC=1 \
                 ',
                 True,
             ],
             [#24
+                're.search',
                 '$(ABC)=1 \
                 ',
                 True,
             ],
             [#25
+                're.search',
                 '$(ABC):=1 \
                 ',
                 True,
             ],
             [#26
+                're.search',
                 '#ABC=1 \
                 ',
                 True,
             ],
-            [#27
+            [  #27
+                're.search',
                 '     #(ABC)=1 \
                 ',
                 True,
             ],
+            [  #28
+                're.findall',
+                'export ABC=1 \
+                ',
+                ['ABC='],
+            ],
+            [  #29
+                're.findall',
+                '_abc=$(call AAD, VAR1, VAR2) \
+                ',
+                ['_abc='],
+            ],
         ]
 
         for index, test_case in enumerate(test_cases):
-            test_result = bool(re.search(regex_to_test, test_case[0]))
+            if test_case[0] == 're.findall':
+                test_result = re.findall(regex_to_test, test_case[1])
+            else:
+                test_result = bool(re.search(regex_to_test, test_case[1]))
             with self.subTest(test_case=test_case):
-                self.assertEqual(test_result, test_case[1], f"Line {inspect.currentframe().f_lineno} : Test Case {index}")
+                self.assertEqual(test_result, test_case[2], f"Line {inspect.currentframe().f_lineno} : Test Case {index}")
 
 if __name__ == '__main__':
     unittest.main()

@@ -82,6 +82,7 @@ with open(makefile_path, "r") as file:
     temp_temp_line = ''
     temp_temp_temp_line = ''
     temp_temp_temp_temp_line = ''
+    temp_temp_temp_temp_temp_line = ''
     temp_temp_temp_temp_temp_temp_line = ''
     command = []
     process = None
@@ -158,13 +159,13 @@ with open(makefile_path, "r") as file:
             # because there might be some random makefile error after running the makefile
             # using this endif to tell me not to include any outputs that outputs after this `endif` output
             temp_temp_makefile_content.append(temp_temp_line)
-            temp_temp_temp_temp_maekfile_content = []
-            temp_temp_temp_temp_maekfile_content = temp_makefile_content.copy()
-            temp_temp_temp_temp_maekfile_content.extend(temp_temp_makefile_content)
+            temp_temp_temp_temp_makefile_content = []
+            temp_temp_temp_temp_makefile_content = temp_makefile_content.copy()
+            temp_temp_temp_temp_makefile_content.extend(temp_temp_makefile_content)
             temp_temp_makefile_content = []
 
             with open(makefile_preprocessed_path, "w") as file_3:
-                file_3.write(''.join(temp_temp_temp_temp_maekfile_content))
+                file_3.write(''.join(temp_temp_temp_temp_makefile_content))
                 file_3.flush()
             prepare_for_war = False
 
@@ -277,6 +278,8 @@ with open(makefile_path, "r") as file:
     temp_line = ''
     temp_temp_line = ''
     temp_temp_temp_line = ''
+    temp_temp_temp_temp_line = ''
+    temp_temp_temp_temp_temp_line = ''
     temp_temp_temp_temp_temp_temp_line = ''
     command = []
     process = None
@@ -338,7 +341,7 @@ with open(makefile_preprocessed_path, "r") as file:
         if temp_temp_temp_temp_temp_temp_temp_line.startswith('#'):
             continue
 
-        # search for all variables
+        # search for all wrapped variables
         if re.search(test.variable_regex, line):
             matches = re.findall(test.variable_regex, line)
             for match in matches:
@@ -426,8 +429,98 @@ with open(makefile_preprocessed_path, "r") as file:
                     if output:
                         makefile_database_file.write(''.join(output_to_write))
                         makefile_database_file.flush()
+
+
+        # search for all assigned variables
+        if re.search(test.variable_regex_2, line):
+            matches = re.findall(test.variable_regex_2, line)
+            for match in matches:
+                output_to_write = []
+
+                # Just wanna make it to write `$(info VAR=$(VAR))`
+                # So when run make, it will print `VAR=value`
+                match_string = match
+                match_string = match_string.replace(':', '').replace('=', '')
+                match_string = match_string.trim()
+                
+                string_to_search_for = match_string + '='
+                
+                makefile_database_file = open(makefile_database_path, "r")
+                # Search weather this variable is existed in the databse
+                makefile_database_file.seek(0)
+                
+                makefile_database_lines = makefile_database_file.readlines()
+
+                # after reading lines, close the file and reopen again with append mode
+                # for writing operation later
+                makefile_database_file.close()
+                makefile_database_file = open(makefile_database_path, "a")
+                
+                # Search weather this variable existed in database
+                found = False
+                the_value = ''
+                # reason why i put line_2, cos, it will disturb the original `line` that i had above LOL
+                # loop from bottom to top, bottom one are the newest value
+                for line_2 in reversed(makefile_database_lines):
+                    found = False
+                    # because i added to print line number, like this `123:abc`
+                    # now, i want to strip `123`
+                    stripped_line = line_2.split(":")[2]
+                    if stripped_line.startswith(string_to_search_for):
+                        found = True
+                        # get the value
+                        # eg: the line is like this
+                        # ROOTPATH=/user/home
+                        # the valeu will be `/user/home`
+                        the_value = line_2[line_2.index(string_to_search_for) + len(string_to_search_for):].strip()
+                        break
+                
+                # Regardless if database contains the variable, evaluates the value
+                # Because what if the variable has changed value?
+                with open(temp_makefile_path, "w") as file_2:
+                    temp_temp_makefile_content = temp_makefile_content.copy()
+                    temp_temp_makefile_content.append(f"$(info {match_string}={match})\n")
+                    # the content only be written after the file descriptor is closed, well, unless you call file.flush()
+                    file_2.write(''.join(temp_temp_makefile_content))
+
+                # Call a process to execute `make` command, copy my current environment to it
+                process = subprocess.Popen(['make', '-f', temp_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
+                # Example output
+                # Output : b'<the value of {match}\n'
+                # error : make: *** no targets. Stop.\n'
+                # the `b` infront, is not count in the character, it basically means it is displaying in binrary format i guess
+                output, error = process.communicate()
+                # this is to remove '\n' at the end
+                output_stripped = output.decode("utf-8")[:-1]
+                # Then, there are cases where `MAKE=\n ERROR`
+                # whereby the error message is printed after the '\n'
+                output_stripped = output_stripped.split('\n', 1)[0]
+                # remove trailing whitespace, else, later compare `==` will treat it differently
+                output_stripped = output_stripped.strip()
+                line_number = str(index+1)
+                output_to_write.append(makefile_path + ':' + line_number + ':' + output_stripped + '\n')
+                # this is for the matching later, i dont want to write into database if
+                # PATH=abc already existed in the database
+                # But if PATH=def, that is, same varaible name, but different value, then write into database
+                output_to_match_for_the_value = output_stripped
+                output_to_match_for_the_value = output_to_match_for_the_value[len(string_to_search_for):]
+
+                if found:
+                    # If database contains the variable, check whether the value is the same
+                    # if diff value, WRITE IT TO DATABASE
+                    if the_value != output_to_match_for_the_value and \
+                        output:
+                        makefile_database_file.write(''.join(output_to_write))
+                        makefile_database_file.flush()
+
+                else:
+                    # else, write into database
+                    # only write when `output` has something
+                    if output:
+                        makefile_database_file.write(''.join(output_to_write))
+                        makefile_database_file.flush()
                     
-        # search for included makefile
+        # search for `include makefile`
         if line.startswith('include'):
             # first, we have to find whether there's variable in the path
             # eg: include ../$(WORKSPACE)/path/to/Makefile
