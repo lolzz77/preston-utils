@@ -1,4 +1,4 @@
-# Makefile Dictionary Utility
+# Makefile Utility
 
 # What
 ![image](./resources/1.png)
