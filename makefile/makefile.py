@@ -340,7 +340,8 @@ with open(makefile_preprocessed_path, "r") as file:
         temp_temp_temp_temp_temp_temp_temp_line = line.lstrip()
         if temp_temp_temp_temp_temp_temp_temp_line.startswith('#'):
             continue
-
+        if index == 102:
+            print("AA")
         # search for all wrapped variables
         if re.search(test.variable_regex, line):
             matches = re.findall(test.variable_regex, line)
@@ -413,7 +414,7 @@ with open(makefile_preprocessed_path, "r") as file:
                 # PATH=abc already existed in the database
                 # But if PATH=def, that is, same varaible name, but different value, then write into database
                 output_to_match_for_the_value = output_stripped
-                output_to_match_for_the_value = output_to_match_for_the_value[len(string_to_search_for):]
+                output_to_match_for_the_value = output_to_match_for_the_value[len(string_to_search_for):].strip()
 
                 if found:
                     # If database contains the variable, check whether the value is the same
@@ -437,6 +438,7 @@ with open(makefile_preprocessed_path, "r") as file:
         if re.search(test.variable_regex_2, line):
             matches = re.findall(test.variable_regex_2, line)
             for match in matches:
+
                 output_to_write = []
 
                 match_string = match
@@ -444,6 +446,11 @@ with open(makefile_preprocessed_path, "r") as file:
                 match_string = match_string.replace(':', '').replace('=', '')
                 # remove all leading & trailing whitespaces
                 match_string = match_string.strip()
+
+                if 'L1_MAKEFLAGS' in match_string:
+                    print("AA")
+
+                wrapped_string = '$(' + match_string + ')'
                 
                 string_to_search_for = match_string + '='
                 
@@ -467,7 +474,7 @@ with open(makefile_preprocessed_path, "r") as file:
                 
                 with open(temp_makefile_path, "w") as file_2:
                     temp_temp_makefile_content = temp_makefile_content.copy()
-                    temp_temp_makefile_content.append(f"$(info {match_string}={match})\n")
+                    temp_temp_makefile_content.append(f"$(info {match_string}={wrapped_string})\n")
                     file_2.write(''.join(temp_temp_makefile_content))
 
                 process = subprocess.Popen(['make', '-f', temp_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
@@ -478,7 +485,7 @@ with open(makefile_preprocessed_path, "r") as file:
                 line_number = str(index+1)
                 output_to_write.append(makefile_path + ':' + line_number + ':' + output_stripped + '\n')
                 output_to_match_for_the_value = output_stripped
-                output_to_match_for_the_value = output_to_match_for_the_value[len(string_to_search_for):]
+                output_to_match_for_the_value = output_to_match_for_the_value[len(string_to_search_for):].strip()
 
                 if found:
                     if the_value != output_to_match_for_the_value and \
