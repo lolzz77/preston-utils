@@ -49,7 +49,7 @@ makefile_command = passed_in_command.split()
 makefile_command = [word.strip() for word in makefile_command]
 
 current_path = os.getcwd()
-makefile_python_output_path = current_path + '/makefile_python_output'
+makefile_python_output_path = current_path + '/preston_utils_makefile_output'
 
 # Create my output folder if not exists
 if not os.path.exists(makefile_python_output_path):
