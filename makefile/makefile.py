@@ -436,67 +436,66 @@ with open(makefile_preprocessed_path, "r") as file:
         # code similar to `if re.search(test.variable_regex, line):` above
         # if want understand, look comments over there
         if re.search(test.variable_regex_2, line):
-            matches = re.findall(test.variable_regex_2, line)
-            for match in matches:
+            match = re.search(test.variable_regex_2, line)
 
-                output_to_write = []
+            output_to_write = []
 
-                match_string = match
-                # cos my regex matches `=` and `:=`, remove it
-                match_string = match_string.replace(':', '').replace('=', '')
-                # remove all leading & trailing whitespaces
-                match_string = match_string.strip()
+            match_string = match.group()
+            # cos my regex matches `=` and `:=`, remove it
+            match_string = match_string.replace(':', '').replace('=', '')
+            # remove all leading & trailing whitespaces
+            match_string = match_string.strip()
 
-                if 'L1_MAKEFLAGS' in match_string:
-                    print("AA")
+            if 'L1_MAKEFLAGS' in match_string:
+                print("AA")
 
-                wrapped_string = '$(' + match_string + ')'
-                
-                string_to_search_for = match_string + '='
-                
-                makefile_database_file = open(makefile_database_path, "r")
-                makefile_database_file.seek(0)
-                
-                makefile_database_lines = makefile_database_file.readlines()
+            wrapped_string = '$(' + match_string + ')'
+            
+            string_to_search_for = match_string + '='
+            
+            makefile_database_file = open(makefile_database_path, "r")
+            makefile_database_file.seek(0)
+            
+            makefile_database_lines = makefile_database_file.readlines()
 
-                makefile_database_file.close()
-                makefile_database_file = open(makefile_database_path, "a")
-                
+            makefile_database_file.close()
+            makefile_database_file = open(makefile_database_path, "a")
+            
+            found = False
+            the_value = ''
+            for line_2 in reversed(makefile_database_lines):
                 found = False
-                the_value = ''
-                for line_2 in reversed(makefile_database_lines):
-                    found = False
-                    stripped_line = line_2.split(":")[2]
-                    if stripped_line.startswith(string_to_search_for):
-                        found = True
-                        the_value = line_2[line_2.index(string_to_search_for) + len(string_to_search_for):].strip()
-                        break
-                
-                with open(temp_makefile_path, "w") as file_2:
-                    temp_temp_makefile_content = temp_makefile_content.copy()
-                    temp_temp_makefile_content.append(f"$(info {match_string}={wrapped_string})\n")
-                    file_2.write(''.join(temp_temp_makefile_content))
+                stripped_line = line_2.split(":")[2]
+                if stripped_line.startswith(string_to_search_for):
+                    found = True
+                    the_value = line_2[line_2.index(string_to_search_for) + len(string_to_search_for):].strip()
+                    break
+            
+            with open(temp_makefile_path, "w") as file_2:
+                temp_temp_makefile_content = temp_makefile_content.copy()
+                temp_temp_makefile_content.append(f"$(info {match_string}={wrapped_string})\n")
+                file_2.write(''.join(temp_temp_makefile_content))
 
-                process = subprocess.Popen(['make', '-f', temp_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
-                output, error = process.communicate()
-                output_stripped = output.decode("utf-8")[:-1]
-                output_stripped = output_stripped.split('\n', 1)[0]
-                output_stripped = output_stripped.strip()
-                line_number = str(index+1)
-                output_to_write.append(makefile_path + ':' + line_number + ':' + output_stripped + '\n')
-                output_to_match_for_the_value = output_stripped
-                output_to_match_for_the_value = output_to_match_for_the_value[len(string_to_search_for):].strip()
+            process = subprocess.Popen(['make', '-f', temp_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
+            output, error = process.communicate()
+            output_stripped = output.decode("utf-8")[:-1]
+            output_stripped = output_stripped.split('\n', 1)[0]
+            output_stripped = output_stripped.strip()
+            line_number = str(index+1)
+            output_to_write.append(makefile_path + ':' + line_number + ':' + output_stripped + '\n')
+            output_to_match_for_the_value = output_stripped
+            output_to_match_for_the_value = output_to_match_for_the_value[len(string_to_search_for):].strip()
 
-                if found:
-                    if the_value != output_to_match_for_the_value and \
-                        output:
-                        makefile_database_file.write(''.join(output_to_write))
-                        makefile_database_file.flush()
+            if found:
+                if the_value != output_to_match_for_the_value and \
+                    output:
+                    makefile_database_file.write(''.join(output_to_write))
+                    makefile_database_file.flush()
 
-                else:
-                    if output:
-                        makefile_database_file.write(''.join(output_to_write))
-                        makefile_database_file.flush()
+            else:
+                if output:
+                    makefile_database_file.write(''.join(output_to_write))
+                    makefile_database_file.flush()
                     
 
         # search for `include makefile`

@@ -132,7 +132,7 @@ class RegexClass(unittest.TestCase):
         for index, test_case in enumerate(test_cases):
             if test_case[0] == 're.findall':
                 test_result = re.findall(regex_to_test, test_case[1])
-            else:
+            else: #re.search
                 test_result = bool(re.search(regex_to_test, test_case[1]))
             with self.subTest(test_case=test_case):
                 self.assertEqual(test_result, test_case[2], f"Line {inspect.currentframe().f_lineno} : Test Case {index}")
@@ -459,29 +459,36 @@ class RegexClass(unittest.TestCase):
                 ',
                 True,
             ],
-            [  #27
+            [#27
                 're.search',
                 '     #(ABC)=1 \
                 ',
                 True,
             ],
-            [  #28
+            [#28
                 're.findall',
                 'export ABC=1 \
                 ',
                 ['ABC='],
             ],
-            [  #29
+            [#29
                 're.findall',
                 '_abc=$(call AAD, VAR1, VAR2) \
                 ',
                 ['_abc='],
             ],
-            [  #30
+            [#30
                 're.searchOne',
                 '_abc = var1=2 \
                 ',
                 '_abc =',
+            ],
+            [#31
+                # TODO: how to fix?
+                're.search',
+                '$(ABC)$(DEF) "Note: var=no." \
+                ',
+                False,
             ],
         ]
 
@@ -491,9 +498,9 @@ class RegexClass(unittest.TestCase):
             elif test_case[0] == 're.searchOne':
                 test_result = re.search(regex_to_test, test_case[1])
                 test_result = test_result.group()
-            else:
+            else: #re.search
                 test_result = bool(re.search(regex_to_test, test_case[1]))
-                
+
             with self.subTest(test_case=test_case):
                 self.assertEqual(test_result, test_case[2], f"Line {inspect.currentframe().f_lineno} : Test Case {index}")
 
