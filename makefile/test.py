@@ -43,31 +43,31 @@ class RegexClass(unittest.TestCase):
                 'endif',
                 True,
             ],
-            [#0
+            [#1
                 'endif   ',
                 True,
             ],
-            [#1
+            [#2
                 'abcendif',
                 False,
             ],
-            [#2
+            [#3
                 '   abcendif',
                 False,
             ],
-            [#3
+            [#4
                 '   abcendif   ',
                 False,
             ],
-            [#4
+            [#5
                 '#endif',
                 False,
             ],
-            [#5
+            [#6
                 '@endif',
                 False,
             ],
-            [#6
+            [#7
                 """newline
                 endif""",
                 False,
