@@ -33,13 +33,17 @@ import os
 import shutil
 import test
 
-if len(sys.argv) < 3:
+if len(sys.argv) < 2:
     print("Invalid number of argument.")
     sys.exit(1)
 
-makefile_path = sys.argv[1] # the makefile path
-passed_in_command = sys.argv[2]  # the passed in command for this makefile
+makefile_path = sys.argv[1]  # the makefile path
 
+passed_in_command = ''
+
+if len(sys.argv) >= 3:
+    # the passed in command for this makefile
+    passed_in_command = sys.argv[2]
 
 makefile_command = passed_in_command.split()
 makefile_command = [word.strip() for word in makefile_command]
