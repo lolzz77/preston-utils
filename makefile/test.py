@@ -477,13 +477,23 @@ class RegexClass(unittest.TestCase):
                 ',
                 ['_abc='],
             ],
+            [  #30
+                're.searchOne',
+                '_abc = var1=2 \
+                ',
+                '_abc =',
+            ],
         ]
 
         for index, test_case in enumerate(test_cases):
             if test_case[0] == 're.findall':
                 test_result = re.findall(regex_to_test, test_case[1])
+            elif test_case[0] == 're.searchOne':
+                test_result = re.search(regex_to_test, test_case[1])
+                test_result = test_result.group()
             else:
                 test_result = bool(re.search(regex_to_test, test_case[1]))
+                
             with self.subTest(test_case=test_case):
                 self.assertEqual(test_result, test_case[2], f"Line {inspect.currentframe().f_lineno} : Test Case {index}")
 
