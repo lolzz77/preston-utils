@@ -1,10 +1,20 @@
 import unittest
 import re
+import inspect
 
 # detect `endif` word, optional leading & trailing whitespace
-endif_regex = r"^\s*endif\s*"
+endif_regex = r"^\t*endif\t*"
 
 # Matches ${...}, $(...)
+# Note :
+# For this one, it is caller diligence to make sure the line is not a comment line
+# Explanation :
+# Can start with whitepsace
+# But 1st character, cannot start with `#`, the comment
+# Then matches anything except $ and #, for cases like `export $(ABC)`
+# Then, matches $( or ${
+# Then, anything in the bracket
+# Then, ) or }
 variable_regex = r"\$[\(\{][a-zA-Z0-9_-]+[\)\}]"
 
 # detect target recipe, tested in python regex online
@@ -15,7 +25,7 @@ variable_regex = r"\$[\(\{][a-zA-Z0-9_-]+[\)\}]"
 # Optional whitespace
 # Must ':'
 # Cannot contain `=` after that
-target_recipe_regex = r"^(?!#|export|ifeq|ifneq|else|endif)[^\s][a-zA-Z0-9$(){}\s*/_-]+\s*:[^=]"
+target_recipe_regex = r"^(?!#|export|ifeq|ifneq|else|endif)[^\t][a-zA-Z0-9$(){}\t*/_-]+\t*:[^=]"
 # List of test
 # ABC : DEF
 #  ABC : DEF
@@ -38,7 +48,7 @@ target_recipe_regex = r"^(?!#|export|ifeq|ifneq|else|endif)[^\s][a-zA-Z0-9$(){}\
 # eg: ABC=1, ABC:=1, export ABC=1
 # Explanation:
 # Must not start with comment
-variable_regex_2 = r"^(?!#)[a-zA-Z0-9$(){}\s*/_-]+:*="
+variable_regex_2 = r"^(?!#)[a-zA-Z0-9$(){}\t*/_-]+:*="
 # List of test
 # ARM : DSP
 # ABC :
@@ -97,57 +107,76 @@ class RegexClass(unittest.TestCase):
                 '@endif',
                 False,
             ],
+            [#6
+                """newline
+                endif""",
+                False,
+            ],
         ]
 
-        # For failed test case, it will print in the terminal
-        # Look for keyword `FAIL:`
         for index, test_case in enumerate(test_cases):
             test_result = bool(re.search(regex_to_test, test_case[0]))
             with self.subTest(test_case=test_case):
-                self.assertEqual(test_result, test_case[1], f"Failed test case at index {index-1}")
+                self.assertEqual(test_result, test_case[1], f"Line {inspect.currentframe().f_lineno} : Test Case {index}")
 
 
     def test_variable_regex(self):
         regex_to_test = variable_regex
         test_cases = [
             [#0
+                're.search',
                 '$(ABC)',
                 True,
             ],
-            [#0
+            [#1
+                're.search',
                 '    $(ABC)',
                 True,
             ],
-            [#1
+            [#2
+                're.search',
                 'export $(ABC)',
                 True,
             ],
-            [#2
+            [#3
+                're.search',
                 '# $(ABC)',
                 True,
             ],
-            [#3
+            [#4
+                're.search',
                 '${ABC}',
                 True,
             ],
-            [#4
+            [#5
+                're.search',
                 '    ${ABC}',
                 True,
             ],
-            [#5
+            [#6
+                're.search',
                 'export ${ABC}',
                 True,
             ],
-            [#6
+            [  #7
+                're.search',
                 '# ${ABC}',
                 True,
+            ],
+            [  #8
+                're.findall',
+                'export ${ABC} $(DEF)',
+                ['${ABC}', '$(DEF)'],
             ],
         ]
 
         for index, test_case in enumerate(test_cases):
-            test_result = bool(re.search(regex_to_test, test_case[0]))
+            if test_case[0] == 're.findall':
+                test_result = re.findall(regex_to_test, test_case[1])
+            else:
+                test_result = bool(re.search(regex_to_test, test_case[1]))
             with self.subTest(test_case=test_case):
-                self.assertEqual(test_result, test_case[1], f"Failed test case at index {index-1}")
+                self.assertEqual(test_result, test_case[2], f"Line {inspect.currentframe().f_lineno} : Test Case {index}")
 
 if __name__ == '__main__':
     unittest.main()

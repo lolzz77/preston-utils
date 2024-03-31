@@ -5,7 +5,7 @@ ifeq ($(VAR1),VAR1)
 else
 	export PATH:=C
 endif
-
+      # Test skip line
 include /Makefile1.mk
 
 ifneq (,$(findstring windows,$(call lc,$(PATH))))

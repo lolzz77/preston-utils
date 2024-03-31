@@ -332,6 +332,10 @@ with open(makefile_preprocessed_path, "r") as file:
     for index, line in enumerate(lines):
         temp_makefile_content.append(line)
 
+        temp_temp_temp_temp_temp_temp_temp_line = line.lstrip()
+        if temp_temp_temp_temp_temp_temp_temp_line.startswith('#'):
+            continue
+
         # search for all variables
         if re.search(test.variable_regex, line):
             matches = re.findall(test.variable_regex, line)
