@@ -488,8 +488,6 @@ with open(makefile_preprocessed_path, "r") as file:
             output_to_write.append(makefile_path + ':' + line_number + ':' + output_stripped + '\n')
             output_to_match_for_the_value = output_stripped
             output_to_match_for_the_value = output_to_match_for_the_value[len(string_to_search_for):].strip()
-            if match_string == 'obj':
-                print(output)
             if found:
                 if the_value != output_to_match_for_the_value and \
                     output:
