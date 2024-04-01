@@ -398,7 +398,9 @@ with open(makefile_preprocessed_path, "r") as file:
                     file_2.write(''.join(temp_temp_makefile_content))
 
                 # Call a process to execute `make` command, copy my current environment to it
-                process = subprocess.Popen(['make', '-f', temp_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
+                command = ['make', '-f', temp_makefile_path]
+                command.extend(makefile_command)
+                process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
                 # Example output
                 # Output : b'<the value of {match}\n'
                 # error : make: *** no targets. Stop.\n'
@@ -418,7 +420,6 @@ with open(makefile_preprocessed_path, "r") as file:
                 # But if PATH=def, that is, same varaible name, but different value, then write into database
                 output_to_match_for_the_value = output_stripped
                 output_to_match_for_the_value = output_to_match_for_the_value[len(string_to_search_for):].strip()
-
                 if found:
                     # If database contains the variable, check whether the value is the same
                     # if diff value, WRITE IT TO DATABASE
@@ -475,8 +476,10 @@ with open(makefile_preprocessed_path, "r") as file:
                 temp_temp_makefile_content = temp_makefile_content.copy()
                 temp_temp_makefile_content.append(f"$(info {match_string}={wrapped_string})\n")
                 file_2.write(''.join(temp_temp_makefile_content))
-
-            process = subprocess.Popen(['make', '-f', temp_makefile_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
+            
+            command = ['make', '-f', temp_makefile_path]
+            command.extend(makefile_command)
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=os.environ.copy())
             output, error = process.communicate()
             output_stripped = output.decode("utf-8")[:-1]
             output_stripped = output_stripped.split('\n', 1)[0]
@@ -485,7 +488,8 @@ with open(makefile_preprocessed_path, "r") as file:
             output_to_write.append(makefile_path + ':' + line_number + ':' + output_stripped + '\n')
             output_to_match_for_the_value = output_stripped
             output_to_match_for_the_value = output_to_match_for_the_value[len(string_to_search_for):].strip()
-
+            if match_string == 'obj':
+                print(output)
             if found:
                 if the_value != output_to_match_for_the_value and \
                     output:
