@@ -335,15 +335,32 @@ with open(makefile_preprocessed_path, "r") as file:
     append_path = ''
     current_makefile = ''
     new_makefile_path = ''
+    
+    temp_temp_temp_temp_temp_temp_temp_temp_line = ''
 
     lines = file.readlines()
 
     for index, line in enumerate(lines):
-        temp_makefile_content.append(line)
 
         temp_temp_temp_temp_temp_temp_temp_line = line.lstrip()
+
         if temp_temp_temp_temp_temp_temp_temp_line.startswith('#'):
+            temp_makefile_content.append('')
             continue
+
+        # if temp_temp_temp_temp_temp_temp_temp_line.startswith('\n'):
+        #     temp_makefile_content.append('')
+        #     continue
+
+        # if not re.match(test.variable_regex_2, temp_temp_temp_temp_temp_temp_temp_temp_line):
+        #     temp_temp_temp_temp_temp_temp_temp_temp_line = '#TOREMOVE ' + temp_temp_temp_temp_temp_temp_temp_temp_line
+
+        temp_makefile_content.append(temp_temp_temp_temp_temp_temp_temp_line)
+
+        # To handle target_recipe code, copied from above
+        if re.match(test.target_recipe_regex, line):
+            temp_temp_temp_temp_temp_temp_temp_temp_line = '#TOREMOVE ' + line
+            temp_makefile_content[index] = temp_temp_temp_temp_temp_temp_temp_temp_line
 
         # search for all wrapped variables
         if re.search(test.variable_regex, line):
@@ -388,7 +405,7 @@ with open(makefile_preprocessed_path, "r") as file:
                         # the valeu will be `/user/home`
                         the_value = line_2[line_2.index(string_to_search_for) + len(string_to_search_for):].strip()
                         break
-                
+
                 # Regardless if database contains the variable, evaluates the value
                 # Because what if the variable has changed value?
                 with open(temp_makefile_path, "w") as file_2:
