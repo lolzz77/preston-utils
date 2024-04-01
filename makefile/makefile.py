@@ -445,7 +445,7 @@ with open(makefile_preprocessed_path, "r") as file:
 
             match_string = match.group()
             # cos my regex matches `=` and `:=`, remove it
-            match_string = match_string.replace(':', '').replace('=', '')
+            match_string = match_string.replace(':', '').replace('=', '').replace('?', '')
             # remove all leading & trailing whitespaces
             match_string = match_string.strip()
 
