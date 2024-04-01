@@ -30,9 +30,9 @@ target_recipe_regex = r"^(?!export|ifeq|ifneq|else|endif)[^\s][a-zA-Z0-9$(){}\s*
 # Matches variable
 # eg: ABC=1, ABC:=1, export ABC=1
 # Explanation:
-# start with anything, then must match either `:=` or `=`
+# start with anything, then must match either `:=` or `=` or `?=`
 # Cannot be `==` at the end, must only be 1 `=` only
-variable_regex_2 = r"[a-zA-Z0-9$(){}/_-]+\s*:*=(?!=)"
+variable_regex_2 = r"[a-zA-Z0-9$(){}/_-]+\s*[:?]?=(?!=)"
 
 
 class RegexClass(unittest.TestCase):
@@ -490,7 +490,25 @@ class RegexClass(unittest.TestCase):
                 ',
                 False,
             ],
-            # [#32
+            [#32
+                're.search',
+                ' $(ABC) ?= 1 \
+                ',
+                True,
+            ],
+            [#33
+                're.search',
+                ' ABC ?= 1 \
+                ',
+                True,
+            ],
+            [#34
+                're.search',
+                ' export ABC ?= 1 \
+                ',
+                True,
+            ],
+            # [#35
             #     # TODO: how to fix?
             #     're.search',
             #     '$(ABC)$(DEF) "Note: var=no." \

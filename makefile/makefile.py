@@ -344,8 +344,7 @@ with open(makefile_preprocessed_path, "r") as file:
         temp_temp_temp_temp_temp_temp_temp_line = line.lstrip()
         if temp_temp_temp_temp_temp_temp_temp_line.startswith('#'):
             continue
-        if index == 102:
-            print("AA")
+
         # search for all wrapped variables
         if re.search(test.variable_regex, line):
             matches = re.findall(test.variable_regex, line)
@@ -449,9 +448,6 @@ with open(makefile_preprocessed_path, "r") as file:
             match_string = match_string.replace(':', '').replace('=', '')
             # remove all leading & trailing whitespaces
             match_string = match_string.strip()
-
-            if 'L1_MAKEFLAGS' in match_string:
-                print("AA")
 
             wrapped_string = '$(' + match_string + ')'
             
