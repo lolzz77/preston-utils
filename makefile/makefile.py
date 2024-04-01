@@ -60,13 +60,13 @@ makefile_preprocessed_path = makefile_python_output_path + '/makefile_preprocess
 temp_makefile_path = makefile_python_output_path + '/temp_makefile.mk'
 
 # always create & truncate the file
-makefile_database_file = open(makefile_database_path, "w")
+makefile_database_file = open(makefile_database_path, "w", encoding='utf-8')
 makefile_database_file.close()
 
 make_file_content = []
 
 # Pre-processing, settle all the guardings
-with open(makefile_path, "r") as file:
+with open(makefile_path, "r", encoding='utf-8') as file:
     has_guarding = False
     prepare_for_war = False
     is_target_recipe = False
@@ -168,7 +168,7 @@ with open(makefile_path, "r") as file:
             temp_temp_temp_temp_makefile_content.extend(temp_temp_makefile_content)
             temp_temp_makefile_content = []
 
-            with open(makefile_preprocessed_path, "w") as file_3:
+            with open(makefile_preprocessed_path, "w", encoding='utf-8') as file_3:
                 file_3.write(''.join(temp_temp_temp_temp_makefile_content))
                 file_3.flush()
             prepare_for_war = False
@@ -191,7 +191,10 @@ with open(makefile_path, "r") as file:
             index_3 = -1
             for line_5 in temp_temp_temp_makefile_content:
                 index_3 += 1
-                output_list_0 = output_list[0]
+                if len(output_list) == 0:
+                    output_list_0 = ''
+                else:
+                    output_list_0 = output_list[0]
                 match_2 = re.match(test.endif_regex, output_list_0)
                 # `endif` found, what comes after the list probably random makefile error, ends here
                 if match_2:
@@ -202,7 +205,7 @@ with open(makefile_path, "r") as file:
                 # if match, remove from list, that means, the one that i dont want to replace to newline, is found
                 # Once we removed from list, keep going until we found `endif`
                 # once `endif` is found, time to exit this sub-operation
-                if line_5 == output_list[0]:
+                if line_5 == output_list_0:
                     output_list.pop(0)
 
                     # Because in cases like
@@ -297,7 +300,7 @@ with open(makefile_path, "r") as file:
     output_list_0 = ''
     match_2 = None
 
-with open(makefile_preprocessed_path, "w") as file_4:
+with open(makefile_preprocessed_path, "w", encoding='utf-8') as file_4:
     file_4.write(''.join(make_file_content))
     file_4.flush()
     
@@ -307,7 +310,7 @@ with open(makefile_preprocessed_path, "w") as file_4:
 
 
 # This one do the makefile dictionary
-with open(makefile_preprocessed_path, "r") as file:
+with open(makefile_preprocessed_path, "r", encoding='utf-8') as file:
 
     lines = []
     temp_makefile_content = []
@@ -395,7 +398,7 @@ with open(makefile_preprocessed_path, "r") as file:
                 
                 string_to_search_for = match_string + '='
                 
-                makefile_database_file = open(makefile_database_path, "r")
+                makefile_database_file = open(makefile_database_path, "r", encoding='utf-8')
                 # Search weather this variable is existed in the databse
                 makefile_database_file.seek(0)
                 
@@ -404,7 +407,7 @@ with open(makefile_preprocessed_path, "r") as file:
                 # after reading lines, close the file and reopen again with append mode
                 # for writing operation later
                 makefile_database_file.close()
-                makefile_database_file = open(makefile_database_path, "a")
+                makefile_database_file = open(makefile_database_path, "a", encoding='utf-8')
                 
                 # Search weather this variable existed in database
                 found = False
@@ -427,7 +430,7 @@ with open(makefile_preprocessed_path, "r") as file:
 
                 # Regardless if database contains the variable, evaluates the value
                 # Because what if the variable has changed value?
-                with open(temp_makefile_path, "w") as file_2:
+                with open(temp_makefile_path, "w", encoding='utf-8') as file_2:
                     temp_temp_makefile_content = temp_makefile_content.copy()
                     temp_temp_makefile_content.append(f"$(info {match_string}={match})\n")
                     # the content only be written after the file descriptor is closed, well, unless you call file.flush()
@@ -490,13 +493,13 @@ with open(makefile_preprocessed_path, "r") as file:
             
             string_to_search_for = match_string + '='
             
-            makefile_database_file = open(makefile_database_path, "r")
+            makefile_database_file = open(makefile_database_path, "r", encoding='utf-8')
             makefile_database_file.seek(0)
             
             makefile_database_lines = makefile_database_file.readlines()
 
             makefile_database_file.close()
-            makefile_database_file = open(makefile_database_path, "a")
+            makefile_database_file = open(makefile_database_path, "a", encoding='utf-8')
             
             found = False
             the_value = ''
@@ -508,7 +511,7 @@ with open(makefile_preprocessed_path, "r") as file:
                     the_value = line_2[line_2.index(string_to_search_for) + len(string_to_search_for):].strip()
                     break
             
-            with open(temp_makefile_path, "w") as file_2:
+            with open(temp_makefile_path, "w", encoding='utf-8') as file_2:
                 temp_temp_makefile_content = temp_makefile_content.copy()
                 temp_temp_makefile_content.append(f"$(info {match_string}={wrapped_string})\n")
                 file_2.write(''.join(temp_temp_makefile_content))
@@ -544,7 +547,7 @@ with open(makefile_preprocessed_path, "r") as file:
 
             if makefile_database_file:
                 makefile_database_file.close()
-            makefile_database_file = open(makefile_database_path, "r")
+            makefile_database_file = open(makefile_database_path, "r", encoding='utf-8')
             makefile_database_lines = makefile_database_file.readlines()
             matches = re.findall(test.variable_regex, line)
             output_to_write = []
@@ -567,7 +570,7 @@ with open(makefile_preprocessed_path, "r") as file:
             # if you put, above code will error out of index when doing stripping
             output_to_write.append(makefile_path + ':' + str(index + 1) + ':' + temp_line)
             makefile_database_file.close()
-            makefile_database_file = open(makefile_database_path, "a")
+            makefile_database_file = open(makefile_database_path, "a", encoding='utf-8')
             makefile_database_file.write(''.join(output_to_write))
             makefile_database_file.flush()
 
