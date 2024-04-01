@@ -366,6 +366,8 @@ with open(makefile_preprocessed_path, "r") as file:
         # TODO: Once is_target_recipe is set to TRUE, there's no return
         # What will happen if you have another variable assignment after the whole target_recipe?
         # Does it still work like that? hmm...
+        # Update: I tried to put another variable assignment after the whole target_recipe block, it works
+        # The variable is not commented and value is printed. IT WORKS, I DONT KNOW WHY
         if not re.match(test.variable_regex_2, line) and line != '\n' and is_target_recipe:
             temp_temp_temp_temp_temp_temp_temp_temp_line = '#TOREMOVE ' + line
             temp_makefile_content.append(temp_temp_temp_temp_temp_temp_temp_temp_line)
