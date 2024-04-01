@@ -337,6 +337,7 @@ with open(makefile_preprocessed_path, "r") as file:
     new_makefile_path = ''
     
     temp_temp_temp_temp_temp_temp_temp_temp_line = ''
+    is_target_recipe= False
 
     lines = file.readlines()
 
@@ -348,19 +349,18 @@ with open(makefile_preprocessed_path, "r") as file:
             temp_makefile_content.append('')
             continue
 
-        # if temp_temp_temp_temp_temp_temp_temp_line.startswith('\n'):
-        #     temp_makefile_content.append('')
-        #     continue
+        if not re.match(test.variable_regex_2, line) and line != '\n' and is_target_recipe:
+            temp_temp_temp_temp_temp_temp_temp_temp_line = '#TOREMOVE ' + line
+            temp_makefile_content.append(temp_temp_temp_temp_temp_temp_temp_temp_line)
+        else:
+            temp_makefile_content.append(temp_temp_temp_temp_temp_temp_temp_line)
 
-        # if not re.match(test.variable_regex_2, temp_temp_temp_temp_temp_temp_temp_temp_line):
-        #     temp_temp_temp_temp_temp_temp_temp_temp_line = '#TOREMOVE ' + temp_temp_temp_temp_temp_temp_temp_temp_line
-
-        temp_makefile_content.append(temp_temp_temp_temp_temp_temp_temp_line)
 
         # To handle target_recipe code, copied from above
         if re.match(test.target_recipe_regex, line):
             temp_temp_temp_temp_temp_temp_temp_temp_line = '#TOREMOVE ' + line
             temp_makefile_content[index] = temp_temp_temp_temp_temp_temp_temp_temp_line
+            is_target_recipe = True
 
         # search for all wrapped variables
         if re.search(test.variable_regex, line):
