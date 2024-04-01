@@ -345,10 +345,27 @@ with open(makefile_preprocessed_path, "r") as file:
 
         temp_temp_temp_temp_temp_temp_temp_line = line.lstrip()
 
+        # If comment, append ''
         if temp_temp_temp_temp_temp_temp_temp_line.startswith('#'):
             temp_makefile_content.append('')
             continue
+        
+        # If is within targer_recipe, all the code under target_recipe, append `#TOREMOVE`
+        # reason for this is because some code under target_recipe will fail if no target_recipe
+        # eg:
+        # target_recipe:
+        #    compile_code
+        
+        # Even if i modify makefile to
+        # That is, comment target_recipe, and strip leading whitespace of the `compile_code`
+        # eg:
+        # # COMMENT target_recipe:
+        # compile_code
 
+        # It still complains missing `separator, stop.` error
+        # TODO: Once is_target_recipe is set to TRUE, there's no return
+        # What will happen if you have another variable assignment after the whole target_recipe?
+        # Does it still work like that? hmm...
         if not re.match(test.variable_regex_2, line) and line != '\n' and is_target_recipe:
             temp_temp_temp_temp_temp_temp_temp_temp_line = '#TOREMOVE ' + line
             temp_makefile_content.append(temp_temp_temp_temp_temp_temp_temp_temp_line)
