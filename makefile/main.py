@@ -226,48 +226,6 @@ with open(makefile_path, "r", encoding='utf-8') as file:
                         continue
                 temp_temp_temp_makefile_content[index_9] = '\n'
 
-
-
-            # temp_temp_temp_temp_makefile_content = temp_temp_temp_makefile_content.copy()
-            # index_3 = -1
-            # for line_5 in temp_temp_temp_makefile_content:
-            #     index_3 += 1
-            #     if len(output_list) == 0:
-            #         output_list_0 = ''
-            #     else:
-            #         output_list_0 = output_list[0]
-            #     match_2 = re.match(test.endif_regex, output_list_0)
-            #     # `endif` found, what comes after the list probably random makefile error, ends here
-            #     if match_2:
-            #         # before end, repalce the all the element starting from current index to newline
-            #         temp_temp_temp_temp_makefile_content[index_3:] = ['\n'] * (len(temp_temp_temp_temp_makefile_content) - index_3)
-            #         break
-                
-            #     # # if match, remove from list, that means, the one that i dont want to replace to newline, is found
-            #     # # Once we removed from list, keep going until we found `endif`
-            #     # # once `endif` is found, time to exit this sub-operation
-            #     # if line_5 == output_list_0:
-            #     #     output_list.pop(0)
-
-            #         # Because in cases like
-            #         # #a-commented-target_recipe: 
-            #         #         code
-            #         # The code contains whitespace, thus, makefile will fail without printin anything
-            #         # so, my solution is to trim the whitespace, then, add '#number:TO_ADD_BACK_WHITESPACE` to add back white space later
-            #         # 1 equals to 1 '\t'
-            #         # later add back, add the number of '\t'
-            #         # Reason i put `number:TO_ADD_BACK_WHITESPACE` is so that i can use `endswith("TO_ADD_BACK_WHITESPACE")`
-            #         leading_whitespace_length = len(temp_temp_temp_temp_makefile_content[index_3]) - len(temp_temp_temp_temp_makefile_content[index_3].lstrip())
-            #         temp_temp_temp_temp_makefile_content[index_3] = temp_temp_temp_temp_makefile_content[index_3][:-1]
-            #         temp_temp_temp_temp_makefile_content[index_3] = temp_temp_temp_temp_makefile_content[index_3].lstrip()
-            #         temp_temp_temp_temp_makefile_content[index_3] = temp_temp_temp_temp_makefile_content[index_3] + '#' + str(leading_whitespace_length) + ':TO_ADD_BACK_WHITESPACE\n'
-
-            #         if is_target_recipe:
-            #             temp_temp_temp_temp_makefile_content[index_3] = '#TOREMOVE ' + temp_temp_temp_temp_makefile_content[index_3]
-
-            #     else:
-            #         temp_temp_temp_temp_makefile_content[index_3] = '\n'
-
             temp_makefile_content.extend(temp_temp_temp_makefile_content)
             temp_temp_temp_temp_makefile_content = []
             temp_temp_temp_makefile_content = []
