@@ -25,7 +25,7 @@ variable_regex = r"\$[\(\{][a-zA-Z0-9_-]+[\)\}]"
 # Optional whitespace
 # Must ':'
 # Cannot contain `=` after that
-target_recipe_regex = r"^(?!export|ifeq|ifneq|else|endif)[^\s][a-zA-Z0-9$(){}\s*/_-]+\s*:[^=]"
+target_recipe_regex = r"^(?!export|ifeq|ifneq|else|endif|\s)[a-zA-Z0-9$\(\)\{\}\s\/_-]+\s*:[^=]"
 
 # Matches variable
 # eg: ABC=1, ABC:=1, export ABC=1
@@ -210,16 +210,26 @@ class RegexClass(unittest.TestCase):
                 False,
             ],
             [#13
-                # The script will handle commented code
+                # The main.py script will handle commented code
+                # that is, this test is not important,
+                # it will not affect how the program behaves
+                # Expected result should be True, 
+                # But because i didnt put [a-zA-Z0-9#] ('#' in the bracket)
+                # Thus, the result will be False
                 '#COMMAND: \
                 ',
-                True,
+                False,
             ],
             [#14
-                # The script will handle commented code
+                # The main.py script will handle commented code
+                # that is, this test is not important,
+                # it will not affect how the program behaves
+                # Expected result should be True, 
+                # But because i didnt put [a-zA-Z0-9#] ('#' in the bracket)
+                # Thus, the result will be False
                 '#COMMAND:abc \
                 ',
-                True,
+                False,
             ],
             [#15
                 'ABC = 1 \
@@ -271,7 +281,12 @@ class RegexClass(unittest.TestCase):
                 ',
                 False,
             ],
-            # [#25
+            [#25
+                'all: $(ABC) $(DEF)  \
+                ',
+                True,
+            ],
+            # [#26
             #     # TODO: need fix this?
             #     # This is invalid syntax in makefile,
             #     # Tho makefile will not fail, but the makefile output will be not expected

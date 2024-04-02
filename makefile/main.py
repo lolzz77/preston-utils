@@ -210,7 +210,14 @@ with open(makefile_path, "r", encoding='utf-8') as file:
                         leading_whitespace_length = len(temp_temp_temp_makefile_content[index_9]) - len(temp_temp_temp_makefile_content[index_9].lstrip())
                         temp_temp_temp_makefile_content[index_9] = temp_temp_temp_makefile_content[index_9][:-1]
                         temp_temp_temp_makefile_content[index_9] = temp_temp_temp_makefile_content[index_9].lstrip()
-                        temp_temp_temp_makefile_content[index_9] = temp_temp_temp_makefile_content[index_9] + '#' + str(leading_whitespace_length) + ':TO_ADD_BACK_WHITESPACE\n'
+                        # If end if backward slash, cannot add any comment behind
+                        # TODO: Now, when wanna restore everthing back, the line that has '\\' at the end will not get the whitespace restored
+                        # this will make makefile run fail
+                        if not temp_temp_temp_makefile_content[index_9].endswith('\\'):
+                            temp_temp_temp_makefile_content[index_9] = temp_temp_temp_makefile_content[index_9] + '#' + str(leading_whitespace_length) + ':TO_ADD_BACK_WHITESPACE\n'
+                        else:
+                            temp_temp_temp_makefile_content[index_9] = temp_temp_temp_makefile_content[index_9] + '\n'
+
 
                         if is_target_recipe:
                             temp_temp_temp_makefile_content[index_9] = '#TOREMOVE ' + temp_temp_temp_makefile_content[index_9]
@@ -269,7 +276,12 @@ with open(makefile_path, "r", encoding='utf-8') as file:
             # here set it to False, cause i want anything falls under target_recipe, comment it
             # cos most of the case, `ifeq` that under target_recipe, are mostly command that will execute compile/build/linking
             # which will cause it to fail
-            is_target_recipe = False
+            # Update: Due to the fact that, under target_recipe, there's multiple ifeq, multiple endif
+            # setting is_target_recipe to false here makes it to not putting `#TOREMOVE ` for the lines that is under target_recipe
+            # So, i tied comment it out
+            # And then i tried putting variable assignment after target recipe
+            # Guess what, it works, the variable is still evaluated, i dk why, but hurray
+            # is_target_recipe = False
             continue
         
         if temp_line.startswith('ifeq') or temp_line.startswith('ifneq'):
