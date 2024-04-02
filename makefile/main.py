@@ -73,8 +73,8 @@ with open(makefile_path, "r", encoding='utf-8') as file:
     lines_2 = []
     temp_makefile_content = []
     temp_temp_makefile_content = []
-    # this is for appending to the official write buffer
     temp_temp_temp_makefile_content = []
+    # this is for appending to the official write buffer
     temp_temp_temp_temp_makefile_content = []
     # this is for cases like
     # ifeq...
@@ -102,7 +102,7 @@ with open(makefile_path, "r", encoding='utf-8') as file:
 
 
     lines_2 = file.readlines()
-    for line_4 in lines_2:
+    for index_8, line_4 in enumerate(lines_2):
         temp_line = line_4.lstrip()  # trim leading whitespace
         temp_temp_temp_line = line_4[:-1]  # remgit stove newline at the end
         # Given $(ABC)=1,
@@ -115,7 +115,7 @@ with open(makefile_path, "r", encoding='utf-8') as file:
         # When you run makefile code,
         # It will output the whitespace as well
         # But in the output, it will output `""`, so you gotta remove it later
-        temp_temp_line = f'$(info "{temp_temp_temp_line}")\n'
+        temp_temp_line = f'$(info "{index_8+1}:{temp_temp_temp_line}")\n'
 
         if line_4.isspace(): # if the line is just whitespace & newline, just make it into newline
             temp_temp_line = '\n'
@@ -166,7 +166,6 @@ with open(makefile_path, "r", encoding='utf-8') as file:
             temp_temp_temp_temp_makefile_content = []
             temp_temp_temp_temp_makefile_content = temp_makefile_content.copy()
             temp_temp_temp_temp_makefile_content.extend(temp_temp_makefile_content)
-            temp_temp_makefile_content = []
 
             with open(makefile_preprocessed_path, "w", encoding='utf-8') as file_3:
                 file_3.write(''.join(temp_temp_temp_temp_makefile_content))
@@ -186,50 +185,87 @@ with open(makefile_path, "r", encoding='utf-8') as file:
             output_decoded = output.decode("utf-8")
             output_list = [item[1:-1] + '\n' for item in output_decoded.split('\n')]
             
-            # eliminate all, replace all to newline, except the line that matches with the `output_list`
-            temp_temp_temp_temp_makefile_content = temp_temp_temp_makefile_content.copy()
-            index_3 = -1
-            for line_5 in temp_temp_temp_makefile_content:
-                index_3 += 1
-                if len(output_list) == 0:
-                    output_list_0 = ''
-                else:
-                    output_list_0 = output_list[0]
-                match_2 = re.match(test.endif_regex, output_list_0)
-                # `endif` found, what comes after the list probably random makefile error, ends here
-                if match_2:
-                    # before end, repalce the all the element starting from current index to newline
-                    temp_temp_temp_temp_makefile_content[index_3:] = ['\n'] * (len(temp_temp_temp_temp_makefile_content) - index_3)
-                    break
+            # the last 2 lines, are always
+            # last line = new line
+            output_list.pop()
+            # 2nd last line = `endif` line, sometimes output has only 1 element so need check for null
+            if output_list:
+                output_list.pop()
+
+            # from the output_list, given the line number, retain those,
+            # the rest, make them into newline
+            preserve_line = []
+            for output_1 in output_list:
+                line_number_1, line_8 = output_1.split(':', 1)
+                preserve_line.append(int(line_number_1))
+            
+            list_length = len(temp_makefile_content)
+
+            for index_9, line_9 in enumerate(temp_temp_temp_makefile_content):
                 
-                # if match, remove from list, that means, the one that i dont want to replace to newline, is found
-                # Once we removed from list, keep going until we found `endif`
-                # once `endif` is found, time to exit this sub-operation
-                if line_5 == output_list_0:
-                    output_list.pop(0)
+                if preserve_line:
+                    offset_length = index_9 + list_length + 1
+                    if offset_length == preserve_line[0]:
 
-                    # Because in cases like
-                    # #a-commented-target_recipe: 
-                    #         code
-                    # The code contains whitespace, thus, makefile will fail without printin anything
-                    # so, my solution is to trim the whitespace, then, add '#number:TO_ADD_BACK_WHITESPACE` to add back white space later
-                    # 1 equals to 1 '\t'
-                    # later add back, add the number of '\t'
-                    # Reason i put `number:TO_ADD_BACK_WHITESPACE` is so that i can use `endswith("TO_ADD_BACK_WHITESPACE")`
-                    leading_whitespace_length = len(temp_temp_temp_temp_makefile_content[index_3]) - len(temp_temp_temp_temp_makefile_content[index_3].lstrip())
-                    temp_temp_temp_temp_makefile_content[index_3] = temp_temp_temp_temp_makefile_content[index_3][:-1]
-                    temp_temp_temp_temp_makefile_content[index_3] = temp_temp_temp_temp_makefile_content[index_3].lstrip()
-                    temp_temp_temp_temp_makefile_content[index_3] = temp_temp_temp_temp_makefile_content[index_3] + '#' + str(leading_whitespace_length) + ':TO_ADD_BACK_WHITESPACE\n'
+                        leading_whitespace_length = len(temp_temp_temp_makefile_content[index_9]) - len(temp_temp_temp_makefile_content[index_9].lstrip())
+                        temp_temp_temp_makefile_content[index_9] = temp_temp_temp_makefile_content[index_9][:-1]
+                        temp_temp_temp_makefile_content[index_9] = temp_temp_temp_makefile_content[index_9].lstrip()
+                        temp_temp_temp_makefile_content[index_9] = temp_temp_temp_makefile_content[index_9] + '#' + str(leading_whitespace_length) + ':TO_ADD_BACK_WHITESPACE\n'
 
-                    if is_target_recipe:
-                        temp_temp_temp_temp_makefile_content[index_3] = '#TOREMOVE ' + temp_temp_temp_temp_makefile_content[index_3]
+                        if is_target_recipe:
+                            temp_temp_temp_makefile_content[index_9] = '#TOREMOVE ' + temp_temp_temp_makefile_content[index_9]
 
-                else:
-                    temp_temp_temp_temp_makefile_content[index_3] = '\n'
+                        preserve_line.pop(0)
+                        continue
+                temp_temp_temp_makefile_content[index_9] = '\n'
 
-            temp_makefile_content.extend(temp_temp_temp_temp_makefile_content)
+
+
+            # temp_temp_temp_temp_makefile_content = temp_temp_temp_makefile_content.copy()
+            # index_3 = -1
+            # for line_5 in temp_temp_temp_makefile_content:
+            #     index_3 += 1
+            #     if len(output_list) == 0:
+            #         output_list_0 = ''
+            #     else:
+            #         output_list_0 = output_list[0]
+            #     match_2 = re.match(test.endif_regex, output_list_0)
+            #     # `endif` found, what comes after the list probably random makefile error, ends here
+            #     if match_2:
+            #         # before end, repalce the all the element starting from current index to newline
+            #         temp_temp_temp_temp_makefile_content[index_3:] = ['\n'] * (len(temp_temp_temp_temp_makefile_content) - index_3)
+            #         break
+                
+            #     # # if match, remove from list, that means, the one that i dont want to replace to newline, is found
+            #     # # Once we removed from list, keep going until we found `endif`
+            #     # # once `endif` is found, time to exit this sub-operation
+            #     # if line_5 == output_list_0:
+            #     #     output_list.pop(0)
+
+            #         # Because in cases like
+            #         # #a-commented-target_recipe: 
+            #         #         code
+            #         # The code contains whitespace, thus, makefile will fail without printin anything
+            #         # so, my solution is to trim the whitespace, then, add '#number:TO_ADD_BACK_WHITESPACE` to add back white space later
+            #         # 1 equals to 1 '\t'
+            #         # later add back, add the number of '\t'
+            #         # Reason i put `number:TO_ADD_BACK_WHITESPACE` is so that i can use `endswith("TO_ADD_BACK_WHITESPACE")`
+            #         leading_whitespace_length = len(temp_temp_temp_temp_makefile_content[index_3]) - len(temp_temp_temp_temp_makefile_content[index_3].lstrip())
+            #         temp_temp_temp_temp_makefile_content[index_3] = temp_temp_temp_temp_makefile_content[index_3][:-1]
+            #         temp_temp_temp_temp_makefile_content[index_3] = temp_temp_temp_temp_makefile_content[index_3].lstrip()
+            #         temp_temp_temp_temp_makefile_content[index_3] = temp_temp_temp_temp_makefile_content[index_3] + '#' + str(leading_whitespace_length) + ':TO_ADD_BACK_WHITESPACE\n'
+
+            #         if is_target_recipe:
+            #             temp_temp_temp_temp_makefile_content[index_3] = '#TOREMOVE ' + temp_temp_temp_temp_makefile_content[index_3]
+
+            #     else:
+            #         temp_temp_temp_temp_makefile_content[index_3] = '\n'
+
+            temp_makefile_content.extend(temp_temp_temp_makefile_content)
             temp_temp_temp_temp_makefile_content = []
             temp_temp_temp_makefile_content = []
+            temp_temp_makefile_content = []
+            
             # here set it to False, cause i want anything falls under target_recipe, comment it
             # cos most of the case, `ifeq` that under target_recipe, are mostly command that will execute compile/build/linking
             # which will cause it to fail
