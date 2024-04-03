@@ -103,11 +103,6 @@ with open(makefile_path, "r", encoding='utf-8') as file:
 
     lines_2 = file.readlines()
     for index_8, line_4 in enumerate(lines_2):
-        # if index_8 == 640:
-        #     print("YAA")
-        if index_8 == 716:
-            print("YAA")
-
         temp_line = line_4.lstrip()  # trim leading whitespace
         temp_temp_temp_line = line_4[:-1]  # remgit stove newline at the end
         # Given $(ABC)=1,
@@ -225,7 +220,7 @@ with open(makefile_path, "r", encoding='utf-8') as file:
                             else:
                                 temp_temp_temp_makefile_content[index_9] = temp_temp_temp_makefile_content[index_9] + '\n'
 
-                        if is_backward_slash == False:
+                        elif is_backward_slash == False:
                             # If end if backward slash, cannot add any comment behind
                             # TODO: Now, when wanna restore everthing back, the line that has '\\' at the end will not get the whitespace restored
                             # this will make makefile run fail
@@ -300,8 +295,8 @@ with open(makefile_path, "r", encoding='utf-8') as file:
             # Remove the sentence, from the front
             temp_temp_temp_temp_temp_line = line_7[len("#TO_ADD_BACK_WHITESPACE_BACKWARD_SLASH:"):]
             number_of_whitespace = int(temp_temp_temp_temp_temp_line[0])
-            # Remove the numbers at the beginning of line
-            temp_temp_temp_temp_temp_line = temp_temp_temp_temp_temp_line[1:]
+            # Remove the numbers at the beginning of line, and the newline
+            temp_temp_temp_temp_temp_line = temp_temp_temp_temp_temp_line[2:]
             for _ in range(number_of_whitespace):
                 temp_temp_temp_temp_temp_line = '\t' + temp_temp_temp_temp_temp_line
             make_file_content[index_5] = temp_temp_temp_temp_temp_line
