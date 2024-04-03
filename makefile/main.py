@@ -647,4 +647,6 @@ makefile_database_file.close()
 
 # remove files at the end of script
 os.remove(temp_makefile_path)
+print(f"Output: {makefile_preprocessed_path}")
+print(f"Output: {makefile_database_path}")
 print("Script Ends")
