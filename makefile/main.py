@@ -417,7 +417,7 @@ with open(makefile_preprocessed_path, "r", encoding='utf-8') as file:
         # Does it still work like that? hmm...
         # Update: I tried to put another variable assignment after the whole target_recipe block, it works
         # The variable is not commented and value is printed. IT WORKS, I DONT KNOW WHY
-        if not re.match(test.variable_regex_2, line) and line != '\n' and is_target_recipe:
+        if not re.match(test.assigned_variable_regex, line) and line != '\n' and is_target_recipe:
             temp_temp_temp_temp_temp_temp_temp_temp_line = '#TOREMOVE ' + line
             temp_makefile_content.append(temp_temp_temp_temp_temp_temp_temp_temp_line)
         else:
@@ -524,8 +524,8 @@ with open(makefile_preprocessed_path, "r", encoding='utf-8') as file:
         # search for all assigned variables
         # code similar to `if re.search(test.variable_regex, line):` above
         # if want understand, look comments over there
-        if re.search(test.variable_regex_2, line):
-            match = re.search(test.variable_regex_2, line)
+        if re.search(test.assigned_variable_regex, line):
+            match = re.search(test.assigned_variable_regex, line)
 
             output_to_write = []
 

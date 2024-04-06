@@ -32,7 +32,7 @@ target_recipe_regex = r"^(?!export|ifeq|ifneq|else|endif|\s)[a-zA-Z0-9$\(\)\{\}\
 # Explanation:
 # start with anything, then must match either `:=` or `=` or `?=`
 # Cannot be `==` at the end, must only be 1 `=` only
-variable_regex_2 = r"[a-zA-Z0-9$(){}/_-]+\s*[:?]?=(?!=)"
+assigned_variable_regex = r"[a-zA-Z0-9$(){}/_-]+\s*[:?]?=(?!=)"
 
 
 class RegexClass(unittest.TestCase):
@@ -301,8 +301,8 @@ class RegexClass(unittest.TestCase):
             with self.subTest(test_case=test_case):
                 self.assertEqual(test_result, test_case[1], f"Line {inspect.currentframe().f_lineno} : Test Case {index}")
 
-    def test_variable_regex_2(self):
-        regex_to_test = variable_regex_2
+    def test_assigned_variable_regex(self):
+        regex_to_test = assigned_variable_regex
         # Note: All the test cases here must end with newline
         # Cos, target recipe confirm must end with newline
         test_cases = [
