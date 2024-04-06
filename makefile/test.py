@@ -549,6 +549,11 @@ class TestClass(unittest.TestCase):
 
 
     def test_makefile_1(self):
+        """
+        Makefile to test : Makefile1.mk
+        Argument to pass in : "VAR1=1
+        eg : this unit test will run command `python3 /data/preston-utils/makefile/main.py /data/preston-utils/makefile/test/Makefile1.mk "VAR1=1"
+        """
         makefile_1_path = ''
         python_script = ''
 
@@ -578,6 +583,11 @@ class TestClass(unittest.TestCase):
         self.assertEqual(makefile_1_output_readlines, makefile_1_test_output_readlines, "Makefile1.mk failed")
         
     def test_makefile_2(self):
+        """
+        Makefile to test : Makefile2.mk
+        Argument to pass in : "VAR1=1
+        eg : this unit test will run command `python3 /data/preston-utils/makefile/main.py /data/preston-utils/makefile/test/Makefile2.mk "VAR1=1"
+        """
         makefile_2_path = ''
         python_script = ''
 

@@ -93,10 +93,10 @@
             "type": "python",
             "request": "launch",
             "name": "Python - Makefile",
-            "program": "/data/c-script-append-log-in-all-files-and-functions/makefile/makefile.py",
-            "cwd" : "/data/c-script-append-log-in-all-files-and-functions/makefile/",
+            "program": "/data/preston-utils/makefile/makefile.py",
+            "cwd" : "/data/preston-utils/makefile/",
             "args": [
-                "/data/c-script-append-log-in-all-files-and-functions/makefile/test/Makefile1.mk",
+                "/data/preston-utils/makefile/test/Makefile1.mk",
                 "VAR1=VAR1 VAR2=VAR2"
             ]
         },
@@ -104,8 +104,8 @@
             "type": "python",
             "request": "launch",
             "name": "Python - Makefile - Unit Test",
-            "program": "/data/c-script-append-log-in-all-files-and-functions/makefile/test.py",
-            "cwd" : "/data/c-script-append-log-in-all-files-and-functions/makefile/",
+            "program": "/data/preston-utils/makefile/test.py",
+            "cwd" : "/data/preston-utils/makefile/",
         },
     ]
 }
