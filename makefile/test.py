@@ -1,6 +1,8 @@
 import unittest
 import re
 import inspect
+import os
+import subprocess
 
 # detect `endif` word, optional leading & trailing whitespace
 endif_regex = r"^\t*endif\t*"
@@ -35,7 +37,7 @@ target_recipe_regex = r"^(?!export|ifeq|ifneq|else|endif|\s)[a-zA-Z0-9$\(\)\{\}\
 assigned_variable_regex = r"[a-zA-Z0-9$(){}/_-]+\s*[:?]?=(?!=)"
 
 
-class RegexClass(unittest.TestCase):
+class TestClass(unittest.TestCase):
     def test_endif_regex(self):
         regex_to_test = endif_regex
         test_cases = [
@@ -543,6 +545,67 @@ class RegexClass(unittest.TestCase):
 
             with self.subTest(test_case=test_case):
                 self.assertEqual(test_result, test_case[2], f"Line {inspect.currentframe().f_lineno} : Test Case {index}")
+
+
+
+    def test_makefile_1(self):
+        makefile_1_path = ''
+        python_script = ''
+
+        test_py_path = os.path.abspath(__file__)
+        directory = os.path.dirname(test_py_path)
+        makefile_1_test_output_path = directory + '/test_output/Makefile1_output.mk'
+        makefile_1_test_output_readlines = []
+
+        makefile_1_output_path = ''
+        makefile_1_output_readlines = []
+
+        python_script = directory + '/main.py'
+        makefile_1_path = directory + '/test/Makefile1.mk'
+        command = "python3" + ' ' + python_script + ' ' + makefile_1_path + ' ' + '"VAR1=1"'
+
+        output = subprocess.check_output(command, shell=True)
+        output_list = output.decode("utf-8").split('\n')
+        makefile_1_output_path = output_list[0]
+        makefile_1_output_path = makefile_1_output_path[len('Output: '):]
+
+        with open(makefile_1_output_path, 'r') as file:
+            makefile_1_output_readlines = file.readlines()
+
+        with open(makefile_1_test_output_path, 'r') as file:
+            makefile_1_test_output_readlines = file.readlines()
+
+        self.assertEqual(makefile_1_output_readlines, makefile_1_test_output_readlines, "Makefile1.mk failed")
+        
+    def test_makefile_2(self):
+        makefile_2_path = ''
+        python_script = ''
+
+        test_py_path = os.path.abspath(__file__)
+        directory = os.path.dirname(test_py_path)
+        makefile_2_test_output_path = directory + '/test_output/Makefile2_output.mk'
+        makefile_2_test_output_readlines = []
+
+        makefile_2_output_path = ''
+        makefile_2_output_readlines = []
+
+        python_script = directory + '/main.py'
+        makefile_2_path = directory + '/test/Makefile2.mk'
+        command = "python3" + ' ' + python_script + ' ' + makefile_2_path + ' ' + '"VAR1=1"'
+        
+        output = subprocess.check_output(command, shell=True)
+        output_list = output.decode("utf-8").split('\n')
+        makefile_2_output_path = output_list[0]
+        makefile_2_output_path = makefile_2_output_path[len('Output: '):]
+
+        with open(makefile_2_output_path, 'r') as file:
+            makefile_2_output_readlines = file.readlines()
+
+        with open(makefile_2_test_output_path, 'r') as file:
+            makefile_2_test_output_readlines = file.readlines()
+
+        self.assertEqual(makefile_2_output_readlines, makefile_2_test_output_readlines, "Makefile2.mk failed")
+
 
 if __name__ == '__main__':
     unittest.main()

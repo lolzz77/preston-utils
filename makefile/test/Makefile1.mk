@@ -1,6 +1,7 @@
+# Unit Test runs this command with param VAR1=1
 # Start
 export PATH:=A
-ifeq ($(VAR1),VAR1)
+ifeq ($(VAR1),1)
 	export PATH:=B
 else
 	export PATH:=C
@@ -32,14 +33,14 @@ HELP = \
  
 .PHONY = TARGETA TARGETB
 TARGETA: TARGETB
-ifneq (, $(filter $(VAR1), VAR1 ))
+ifneq (, $(filter $(VAR1), 1 ))
 	echo "1"
 else
 	echo "2"
 endif
 
 TARGETB:
-ifneq (, $(filter $(VAR1), VAR1 ))
+ifneq (, $(filter $(VAR1), 1 ))
 	echo "A"
 else
 	echo "B"
@@ -47,9 +48,9 @@ endif
 
 
 TARGETC: 
-ifneq (, $(filter $(VAR1), VAR1 ))
-	ifneq (, $(filter $(VAR2), VAR2 ))
-		ifneq (, $(filter $(VAR3), VAR3))
+ifneq (, $(filter $(VAR1), 1 ))
+	ifneq (, $(filter $(VAR2), 1 ))
+		ifneq (, $(filter $(VAR3), 1))
 			echo "A1"
 		endif
 	endif
