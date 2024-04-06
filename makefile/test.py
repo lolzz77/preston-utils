@@ -34,7 +34,7 @@ target_recipe_regex = r"^(?!export|ifeq|ifneq|else|endif|\s)[a-zA-Z0-9$\(\)\{\}\
 # Explanation:
 # start with anything, then must match either `:=` or `=` or `?=`
 # Cannot be `==` at the end, must only be 1 `=` only
-assigned_variable_regex = r"[a-zA-Z0-9$(){}/_-]+\s*[:?]?=(?!=)"
+assigned_variable_regex = r"[a-zA-Z0-9$(){}/_-]+\s*[+:?]?=(?!=)"
 
 
 class TestClass(unittest.TestCase):
@@ -525,7 +525,31 @@ class TestClass(unittest.TestCase):
                 ',
                 True,
             ],
-            # [#35
+            [#35
+                're.search',
+                'ABC += 1 \
+                ',
+                True,
+            ],
+            [#36
+                're.searchOne',
+                'ABC += 1 \
+                ',
+                'ABC +=',
+            ],
+            [#37
+                're.searchOne',
+                'ABC := 1 \
+                ',
+                'ABC :=',
+            ],
+            [#38
+                're.searchOne',
+                'ABC ?= 1 \
+                ',
+                'ABC ?=',
+            ],
+            # [#36
             #     # TODO: how to fix?
             #     're.search',
             #     '$(ABC)$(DEF) "Note: var=no." \

@@ -391,7 +391,8 @@ with open(makefile_preprocessed_path, "r", encoding='utf-8') as file:
     lines = file.readlines()
 
     for index, line in enumerate(lines):
-
+        if index == 144:
+            print("AA")
         temp_temp_temp_temp_temp_temp_temp_line = line.lstrip()
 
         # If comment, append ''
@@ -531,7 +532,7 @@ with open(makefile_preprocessed_path, "r", encoding='utf-8') as file:
 
             match_string = match.group()
             # cos my regex matches `=` and `:=`, remove it
-            match_string = match_string.replace(':', '').replace('=', '').replace('?', '')
+            match_string = match_string.replace(':', '').replace('=', '').replace('?', '').replace('+', '')
             # remove all leading & trailing whitespaces
             match_string = match_string.strip()
 

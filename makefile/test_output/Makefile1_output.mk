@@ -17,7 +17,9 @@ include /Makefile1.mk
 	include ../dummy_include/dummy_include.mk
 
 
-F := F
+F = F1
+F := F2
+F += F3
 G = G
 H = H
 
