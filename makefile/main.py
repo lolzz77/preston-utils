@@ -667,8 +667,39 @@ with open(makefile_preprocessed_path, "r", encoding='utf-8') as file:
             # print(output)
             # print(error)
 
-make_file_content = []
-makefile_database_file.close()
+    make_file_content = []
+    makefile_database_file.close()
+
+    lines = []
+    temp_makefile_content = []
+    matches = None
+    makefile_database_lines = []
+    match_string = ''
+    string_to_search_for = ''
+    makefile_database_file = None
+    found = False
+    the_value = ''
+    stripped_line = ''
+    temp_temp_makefile_content = []
+    process = None
+    output = None
+    error = None
+    error_decoded = ''
+    error_list = []
+    output_decoded = ''
+    output_list = []
+    output_stripped = []
+    line_number = 0
+    output_to_write = []
+    output_to_match_for_the_value = []
+    temp_line = ''
+    append_path = ''
+    current_makefile = ''
+    new_makefile_path = ''
+    
+    temp_temp_temp_temp_temp_temp_temp_temp_line = ''
+    is_target_recipe= False
+
 
 
 
@@ -689,16 +720,15 @@ makefile_database_file.close()
 
 # Handling:
 # From database txt, get list of include path
-# with open(makefile_preprocessed_path, "r", encoding='utf-8') as file:
+# with open(makefile_database_path, "r", encoding='utf-8') as file:
 #     lines = []
-#     line_trim_leading_whitespace = ''
-#     matches = None
+#     splits = []
+    
 
 #     lines = file.readlines()
 #     for line in lines:
-#         line_trim_leading_whitespace = line.lstrip()
-#         if line_trim_leading_whitespace.startswith('include'):
-#             matches = re.findall(test.variable_regex, line_trim_leading_whitespace)
+#         splits = 
+#         if line.startswith('include'):
 #             output_to_write = []
 
 #             for match in matches:
