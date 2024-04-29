@@ -720,18 +720,55 @@ with open(makefile_preprocessed_path, "r", encoding='utf-8') as file:
 
 # Handling:
 # From database txt, get list of include path
-# with open(makefile_database_path, "r", encoding='utf-8') as file:
-#     lines = []
-#     splits = []
-    
+with open(makefile_database_path, "r", encoding='utf-8') as file:
+    lines = []
+    splits = []
+    makefile_include_path = ''
+    makefile_current_directory = ''
+    makefile_path = ''
+    makefile_line_number = 0
+    read_data_list = []
+    read_data = ''
+    read_data_number_of_lines = 0
+    write_data = []
+    makefile_content = []
 
-#     lines = file.readlines()
-#     for line in lines:
-#         splits = 
-#         if line.startswith('include'):
-#             output_to_write = []
+    with open(makefile_preprocessed_path, 'r', encoding='utf-8') as file_makefile_path:
+        write_data = file_makefile_path.readlines()
 
-#             for match in matches:
+    lines = file.readlines()
+    for line in lines:
+        splits = line.split(':')
+        makefile_include_path = splits[2]
+        if not makefile_include_path.startswith('include'):
+            continue
+        
+        makefile_path = splits[0]
+        makefile_line_number = int(splits[1]) - 1
+
+        makefile_current_directory = splits[0]
+        makefile_current_directory = makefile_current_directory.rsplit('/', 1)[0]
+
+        # remove leading `include`, and remove the newline at the end
+        makefile_include_path = makefile_include_path[len('include'):-1]
+        makefile_include_path = makefile_include_path.lstrip()
+
+        os.chdir(makefile_current_directory)
+        with open(makefile_include_path, 'r', encoding='utf-8') as file_makefile_include_path:
+            read_data_list = file_makefile_include_path.readlines()
+            read_data_number_of_lines = len(read_data_list)
+            read_data = ''.join(read_data_list)
+
+        write_data[makefile_line_number] = '#MAKEFILE_INCLUDE ' + write_data[makefile_line_number]
+        write_data[makefile_line_number] = write_data[makefile_line_number] + read_data
+        write_data[makefile_line_number] = write_data[makefile_line_number] + '\n#END_MAKEFILE_INCLUDE\n'
+        
+        
+    with open(makefile_with_include_path, 'w', encoding='utf-8') as file_makefile_with_include_path:
+        file_makefile_with_include_path.write(''.join(write_data))
+        file_makefile_with_include_path.flush()
+
+
 
 
 
@@ -741,4 +778,5 @@ with open(makefile_preprocessed_path, "r", encoding='utf-8') as file:
 os.remove(temp_makefile_path)
 print(f"Output: {makefile_preprocessed_path}")
 print(f"Output: {makefile_database_path}")
+print(f"Output: {makefile_with_include_path}")
 print("Script Ends")
