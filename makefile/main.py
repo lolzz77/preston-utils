@@ -70,6 +70,19 @@ makefile_database_file.close()
 
 make_file_content = []
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Pre-processing, settle all the guardings
 with open(makefile_path, "r", encoding='utf-8') as file:
     has_guarding = False
@@ -354,6 +367,14 @@ with open(makefile_path, "r", encoding='utf-8') as file:
 with open(makefile_preprocessed_path, "w", encoding='utf-8') as file_4:
     file_4.write(''.join(make_file_content))
     file_4.flush()
+
+
+
+
+
+
+
+
 
 
 
@@ -648,6 +669,43 @@ with open(makefile_preprocessed_path, "r", encoding='utf-8') as file:
 
 make_file_content = []
 makefile_database_file.close()
+
+
+
+
+
+
+
+
+
+
+
+
+# `include` handling
+# Why this handling can be done after all those finished
+# because when you run makefile that has `include`, it will still process `include`
+# and the variable you have in your memory is still valid
+# like, when you do $(info VAR) after the `include`, is a valid $VAR
+
+# Handling:
+# From database txt, get list of include path
+# with open(makefile_preprocessed_path, "r", encoding='utf-8') as file:
+#     lines = []
+#     line_trim_leading_whitespace = ''
+#     matches = None
+
+#     lines = file.readlines()
+#     for line in lines:
+#         line_trim_leading_whitespace = line.lstrip()
+#         if line_trim_leading_whitespace.startswith('include'):
+#             matches = re.findall(test.variable_regex, line_trim_leading_whitespace)
+#             output_to_write = []
+
+#             for match in matches:
+
+
+
+
 
 # remove files at the end of script
 os.remove(temp_makefile_path)
