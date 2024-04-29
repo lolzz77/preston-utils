@@ -55,8 +55,13 @@ makefile_python_output_path = current_path + '/preston_utils_makefile_output'
 if not os.path.exists(makefile_python_output_path):
     os.makedirs(makefile_python_output_path)
 
+# Database, contains all variables and their values
 makefile_database_path = makefile_python_output_path + '/makefile_database.txt'
+# Preprocessed makefile, remvoe all `ifeq` guarding
 makefile_preprocessed_path = makefile_python_output_path + '/makefile_preprocessed.mk'
+# Preprocessed makefile with include makefile cpied into it. `include` keyword means copy the content of the makefile and paste into the makefile
+makefile_with_include_path = makefile_python_output_path + '/makefile_preprocessed_with_include.mk'
+# This is temporary makefile used for `makefile_database_path` to print out the value
 temp_makefile_path = makefile_python_output_path + '/temp_makefile.mk'
 
 # always create & truncate the file
@@ -349,7 +354,7 @@ with open(makefile_path, "r", encoding='utf-8') as file:
 with open(makefile_preprocessed_path, "w", encoding='utf-8') as file_4:
     file_4.write(''.join(make_file_content))
     file_4.flush()
-    
+
 
 
 
@@ -391,8 +396,6 @@ with open(makefile_preprocessed_path, "r", encoding='utf-8') as file:
     lines = file.readlines()
 
     for index, line in enumerate(lines):
-        if index == 144:
-            print("AA")
         temp_temp_temp_temp_temp_temp_temp_line = line.lstrip()
 
         # If comment, append ''
