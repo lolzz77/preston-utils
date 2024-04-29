@@ -55,7 +55,7 @@
             ]
         },
         {
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "name": "Python - Log to Dir, All Functions",
             "program": "${workspaceFolder}/allFiles.py",
@@ -64,7 +64,7 @@
             ]
         },
         {
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "name": "Python - Log to single file, All Functions",
             "program": "${workspaceFolder}/allFiles.py",
@@ -73,7 +73,7 @@
             ]
         },
         {
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "name": "Python - Caller",
             "program": "${workspaceFolder}/allFiles.py",
@@ -84,13 +84,13 @@
             ]
         },
         {
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "name": "Python - Unit Test",
             "program": "${workspaceFolder}/test.py",
         },
         {
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "name": "Python - Makefile",
             "program": "/data/preston-utils/makefile/makefile.py",
@@ -101,7 +101,7 @@
             ]
         },
         {
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "name": "Python - Makefile - Unit Test",
             "program": "/data/preston-utils/makefile/test.py",
